@@ -10,7 +10,7 @@ GO
 --	Tablas usadas:	dbo.RelacionFinalPrecio (UPDATE)
 -- ================================================
 	
-CREATE PROCEDURE [dbo].[procBoletoDescuentoImportar]
+CREATE PROCEDURE [dbo].[procRelacionFinalPrecioImportar]
 	@LineaTrabajo VARCHAR(100),
 	@TipoObra VARCHAR(100),
 	@TipoMaterial VARCHAR(100),
