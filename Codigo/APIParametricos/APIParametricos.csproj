@@ -14,6 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\imagenes\IMA001C.jpg" />
+    <None Include="wwwroot\imagenes\IMA002C.jpg" />
+    <None Include="wwwroot\imagenes\IMA003C.jpg" />
+    <None Include="wwwroot\imagenes\IMA004C.jpg" />
+    <None Include="wwwroot\imagenes\IMA005C.jpg" />
+    <None Include="wwwroot\imagenes\IMA006C.jpg" />
+    <None Include="wwwroot\imagenes\IMA007C.jpg" />
     <None Include="wwwroot\plantillas\favicon.png" />
   </ItemGroup>
 
@@ -43,7 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Imagenes\" />
+    <Folder Include="wwwroot\imagenes\" />
   </ItemGroup>
 
 </Project>
