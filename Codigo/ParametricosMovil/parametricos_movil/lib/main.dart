@@ -1,25 +1,84 @@
 import 'package:flutter/material.dart';
+import 'parametricos_api.dart';
 
 void main() {
   runApp(
     const MaterialApp(
-      debugShowCheckedModeBanner: false, // <--- Aquí va
+      debugShowCheckedModeBanner: false,
       home: ConstruccionScreen(),
     ),
   );
 }
 
-class ConstruccionScreen extends StatelessWidget {
+// 1. Cambiamos a StatefulWidget
+class ConstruccionScreen extends StatefulWidget {
   const ConstruccionScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const primaryBlue = Color(0xFF003D71); // Azul oscuro de la marca
+  State<ConstruccionScreen> createState() => _ConstruccionScreenState();
+}
 
-    // Definimos un estilo de texto limpio usando la fuente del sistema (Roboto/SF Pro)
-    const baseTextStyle = TextStyle(
-      fontFamily: 'sans-serif', // Forzar estética limpia si es necesario
+class _ConstruccionScreenState extends State<ConstruccionScreen> {
+
+ final ParametricosApi apiService = ParametricosApi();
+
+  final primaryBlue = Color(0xFF003D71); // Azul oscuro de la marca
+
+  // Definimos un estilo de texto limpio usando la fuente del sistema (Roboto/SF Pro)
+  final baseTextStyle = TextStyle(
+    fontFamily: 'sans-serif', // Forzar estética limpia si es necesario
+  );
+
+  List<dynamic> lineasTrabajo = [];
+  List<DropdownMenuItem<int>> opcionesLineaTrabajo = [];
+  int? lineaTrabajoSeleccionada;
+  String? incluye;
+
+  void _cargarLineaTrabajo() async {
+    opcionesLineaTrabajo = await obtenerOpcionesLineaTrabajo();
+    if (opcionesLineaTrabajo.isNotEmpty && lineaTrabajoSeleccionada == null) {
+      lineaTrabajoSeleccionada = opcionesLineaTrabajo.first.value;
+    }
+    setState(() {});
+  }
+
+  Future<List<DropdownMenuItem<int>>> obtenerOpcionesLineaTrabajo() async {
+    lineasTrabajo = await apiService.obtenerLineaTrabajo();
+
+    // Convertimos la lista de mapas a DropdownMenuItem<int>
+    return lineasTrabajo.map<DropdownMenuItem<int>>((linea) {
+      return DropdownMenuItem<int>(
+        value: linea["idLineaTrabajo"], // 👈 valor que guarda el dropdown
+        child: Text(
+          linea["nombre"],
+          style: const TextStyle(color: Colors.black),
+        ), // 👈 lo que se muestra
+      );
+    }).toList();
+  }
+
+  Map<String, dynamic>? obtenerObjetoLineaSeleccionada() {
+    if (lineaTrabajoSeleccionada == null || lineasTrabajo.isEmpty) return null;
+    
+    // Buscamos el mapa que coincida con el ID seleccionado
+    return lineasTrabajo.firstWhere(
+      (linea) => linea["idLineaTrabajo"] == lineaTrabajoSeleccionada,
+      orElse: () => null,
     );
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F9), // Fondo gris azulado muy claro
@@ -74,18 +133,74 @@ class ConstruccionScreen extends StatelessWidget {
                 children: [
                   // CARD 1: Línea y Material
                   _buildSectionCard([
-                    _buildDropdown('LÍNEA DE TRABAJO', 'ALCANTARILLADO SANITARIO', baseTextStyle),
+                    _buildDropdown(
+                      label: 'LÍNEA DE TRABAJO',
+                      currentValue: lineaTrabajoSeleccionada,
+                      items: opcionesLineaTrabajo, // Tu lista poblada desde la API
+                      baseStyle: baseTextStyle,
+                      onChanged: (int? nuevoId) {
+                        setState(() {
+                          lineaTrabajoSeleccionada = nuevoId;
+                        });
+                        
+                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
+                        var objetoCompleto = obtenerObjetoLineaSeleccionada();
+                        incluye = objetoCompleto?['incluye'];
+                      },
+                    ),
                     const SizedBox(height: 16),
-                    _buildDropdown('TIPO DE MATERIAL', 'CONCRETO HIDRAULICO MR 45KG/CM2', baseTextStyle),
+                    _buildDropdown(
+                      label: 'TIPO DE MATERIAL',
+                      currentValue: lineaTrabajoSeleccionada,
+                      items: opcionesLineaTrabajo, // Tu lista poblada desde la API
+                      baseStyle: baseTextStyle,
+                      onChanged: (int? nuevoId) {
+                        setState(() {
+                          lineaTrabajoSeleccionada = nuevoId;
+                        });
+                        
+                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
+                        var objetoCompleto = obtenerObjetoLineaSeleccionada();
+                        incluye = objetoCompleto?['incluye'];
+                      },
+                    ),
                   ]),
                   
                   const SizedBox(height: 12),
 
                   // CARD 2: Obra, Tubería y Metros
                   _buildSectionCard([
-                    _buildDropdown('TIPO DE OBRA', 'COLECTORES E INTERCEPTORES', baseTextStyle),
+                    _buildDropdown(
+                      label: 'TIPO DE OBRA',
+                      currentValue: lineaTrabajoSeleccionada,
+                      items: opcionesLineaTrabajo, // Tu lista poblada desde la API
+                      baseStyle: baseTextStyle,
+                      onChanged: (int? nuevoId) {
+                        setState(() {
+                          lineaTrabajoSeleccionada = nuevoId;
+                        });
+                        
+                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
+                        var objetoCompleto = obtenerObjetoLineaSeleccionada();
+                        incluye = objetoCompleto?['incluye'];
+                      },
+                    ),
                     const SizedBox(height: 16),
-                    _buildDropdown('TIPO DE TUBERÍA', 'PEAD JUNTA HERMETICA TIPO S', baseTextStyle),
+                    _buildDropdown(
+                      label: 'TIPO DE TUBERÍA',
+                      currentValue: lineaTrabajoSeleccionada,
+                      items: opcionesLineaTrabajo, // Tu lista poblada desde la API
+                      baseStyle: baseTextStyle,
+                      onChanged: (int? nuevoId) {
+                        setState(() {
+                          lineaTrabajoSeleccionada = nuevoId;
+                        });
+                        
+                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
+                        var objetoCompleto = obtenerObjetoLineaSeleccionada();
+                        incluye = objetoCompleto?['incluye'];
+                      },
+                    ),
                     const SizedBox(height: 16),
                     _buildInputField('METROS A CONSTRUIR', '700.00', baseTextStyle, suffix: 'MTS'),
                   ]),
@@ -128,24 +243,42 @@ class ConstruccionScreen extends StatelessWidget {
   }
 
   // Widget para Dropdowns personalizados
-  Widget _buildDropdown(String label, String value, TextStyle baseStyle) {
+  Widget _buildDropdown({
+    required String label,
+    required int? currentValue,
+    required List<DropdownMenuItem<int>> items,
+    required ValueChanged<int?> onChanged,
+    required TextStyle baseStyle,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: baseStyle.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black87)),
+        // Etiqueta superior (LÍNEA DE TRABAJO, etc.)
+        Text(
+          label, 
+          style: baseStyle.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black87),
+        ),
         const SizedBox(height: 8),
+        
+        // Contenedor con el diseño gris estético
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12), // Reducimos el vertical porque el Dropdown añade su propio padding
           decoration: BoxDecoration(
             color: const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(child: Text(value, style: baseStyle.copyWith(fontSize: 14))),
-              const Icon(Icons.unfold_more, color: Colors.blueGrey, size: 20),
-            ],
+          child: DropdownButtonHideUnderline( // Oculta la línea horizontal por defecto de Flutter
+            child: DropdownButton<int>(
+              value: currentValue,
+              items: items,
+              onChanged: onChanged,
+              isExpanded: true, // Hace que ocupe todo el ancho disponible del contenedor
+              icon: const Icon(Icons.unfold_more, color: Colors.blueGrey, size: 20), // Tu ícono personalizado de la UI
+              style: baseStyle.copyWith(fontSize: 14, color: Colors.black87),
+              hint: Text("Seleccione una opción", style: baseStyle.copyWith(color: Colors.black38)),
+              dropdownColor: Colors.white, // Color del menú flotante al abrirse
+              borderRadius: BorderRadius.circular(8), // Bordes redondeados también para el menú flotante
+            ),
           ),
         ),
       ],
