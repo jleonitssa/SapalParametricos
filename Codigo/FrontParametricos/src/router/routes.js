@@ -49,11 +49,25 @@ const routes = [
   },
   {
     path: "/Operacion",
-    component: () => import("layouts/VacioLayout.vue"),
+    component: () => import("layouts/MainLayout.vue"),
     children: [
       {
         path: "CalcularParametricos",
         component: () => import("src/pages/OperacionCalcularParametricos.vue"),
+      },
+      {
+        path: "ActualizarParametros",
+        component: () => import("src/pages/OperacionActualizarParametros.vue"),
+      },
+    ],
+  },
+  {
+    path: "/Reportes",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [
+      {
+        path: "LogSistema",
+        component: () => import("src/pages/ReportesLogSistema.vue"),
       },
     ],
   },

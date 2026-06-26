@@ -3,11 +3,7 @@
 import { ref, onMounted } from "vue";
 import { api } from "boot/axios";
 import { useQuasar } from "quasar";
-import {
-  mostrarMensaje,
-  guardarLogSistema,
-  revisarPermisos,
-} from "../functions/funciones";
+import { mostrarMensaje, guardarLogSistema } from "../functions/funciones";
 
 const $q = useQuasar();
 
@@ -32,13 +28,6 @@ const columns = [
     label: "Correo Electrónico",
     align: "left",
     field: "email",
-    sortable: true,
-  },
-  {
-    name: "telefono",
-    label: "Telefono",
-    align: "left",
-    field: "telefono",
     sortable: true,
   },
   {
@@ -75,9 +64,6 @@ const selected = ref([]);
 
 const opcionesGrupoLista = ref([{ idGrupo: 0, nombre: "Cualquiera" }]);
 const opcionesGrupoDetalle = ref([]);
-const opcionesEmpleadoDetalle = ref([]);
-
-const opcionesEmpleadoFiltrado = ref(opcionesEmpleadoDetalle.value);
 
 const opcionesEstatusDetalle = ref([
   { idEstatus: 1, nombre: "Activo" },
@@ -97,8 +83,6 @@ const registro = ref({
   nombre: "",
   apellidos: "",
   idEstatus: 0,
-  telefono: "",
-  idEmpleado: 0,
 });
 
 const registroCont = ref({
@@ -110,15 +94,6 @@ const registroCont = ref({
 
 const grupoModel = ref({ idGrupo: 0, nombre: "" });
 const estatusModel = ref({ idEstatus: 0, nombre: "" });
-const empleadoModel = ref({
-  idEmpleado: 0,
-  nombreCompleto: "",
-  noEmpleado: "",
-  nombre: "",
-  apellidos: "",
-  email: "",
-  telefono: "",
-});
 
 const Editar = ref(false);
 const EditarContra = ref(false);
@@ -131,10 +106,6 @@ const refPassword = ref(null);
 const refPasswordConf = ref(null);
 
 //Permisos
-const permNuevo = ref(false);
-const permEliminar = ref(false);
-const permGuardar = ref(false);
-const permCambiarContrasena = ref(false);
 
 //Llamadas a servidor
 function fetchFromServer(page, rowsPerPage, sortBy, descending) {
@@ -240,15 +211,6 @@ function onRequest(props) {
     });
 }
 
-function filtrarEmpleado(val, update) {
-  update(() => {
-    const needle = val.toLowerCase();
-    opcionesEmpleadoFiltrado.value = opcionesEmpleadoDetalle.value.filter(
-      (v) => v.nombreCompleto.toLowerCase().indexOf(needle) > -1
-    );
-  });
-}
-
 function getSelectedString() {
   return selected.value.length === 0
     ? ""
@@ -304,58 +266,7 @@ onMounted(() => {
       console.log(error);
     });
 
-  const reqe = {
-    idEmpleado: 0,
-    noEmpleado: "",
-    noEconomico: "",
-    idDepartamento: 0,
-    nombre: "",
-    email: "",
-    telefono: "",
-    idPuesto: 0,
-    idArea: 0,
-    idTaller: 0,
-    valorUnico: true,
-    initRow: 1,
-    endRow: 100000,
-    sortColumn: "NombreCompleto",
-    sortDir: "ASC",
-  };
-
-  api
-    .post("/empleado/EmpleadoSelect", reqe, {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-    .then((response) => {
-      var resp = response.data;
-
-      if (resp.codigo == 1) {
-        opcionesEmpleadoDetalle.value.splice(1, 0, ...resp.empleados);
-      } else {
-        console.log(resp.mensaje);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
   onRequest({ pagination: pagination.value });
-
-  revisarPermisos(
-    $q.localStorage.getItem("idgrupo"),
-    "/Configuracion/Usuarios",
-    permEliminar,
-    "Eliminar",
-    permGuardar,
-    "Guardar",
-    permNuevo,
-    "Nuevo",
-    permCambiarContrasena,
-    "Cambiar Contraseña"
-  );
 });
 
 function onClickBuscar() {
@@ -367,20 +278,12 @@ function onClickBuscar() {
 function seleccionarRegistro(e, obj, index) {
   registro.value = Object.assign({}, obj);
 
-  obj.idEmpleado = obj.idEmpleado == null ? 0 : obj.idEmpleado;
-
   grupoModel.value = opcionesGrupoDetalle.value.filter((ob) => {
     return ob.idGrupo == obj.idGrupo;
   })[0];
 
-  //console.log(grupoModel.value);
-
   estatusModel.value = opcionesEstatusDetalle.value.filter((ob) => {
     return ob.idEstatus == obj.idEstatus;
-  })[0];
-
-  empleadoModel.value = opcionesEmpleadoDetalle.value.filter((ob) => {
-    return ob.idEmpleado == obj.idEmpleado;
   })[0];
 
   Editar.value = true;
@@ -395,8 +298,6 @@ function onClickNuevo() {
     nombre: "",
     apellidos: "",
     idEstatus: 1,
-    telefono: "",
-    idEmpleado: 0,
   };
 
   grupoModel.value = opcionesGrupoDetalle.value.filter((ob) => {
@@ -404,8 +305,6 @@ function onClickNuevo() {
   })[0];
 
   estatusModel.value = opcionesEstatusDetalle.value[0];
-
-  empleadoModel.value = opcionesEmpleadoDetalle.value[0];
 
   Editar.value = true;
 }
@@ -590,8 +489,6 @@ function onClickGuardar() {
             email: registro.value.email,
             nombre: registro.value.nombre,
             apellidos: registro.value.apellidos,
-            telefono: registro.value.telefono,
-            idEmpleado: empleadoModel.value.idEmpleado,
           };
 
           api
@@ -670,8 +567,6 @@ function onClickGuardar() {
             nombre: registro.value.nombre,
             apellidos: registro.value.apellidos,
             idEstatus: estatusModel.value.idEstatus,
-            telefono: registro.value.telefono,
-            idEmpleado: empleadoModel.value.idEmpleado,
           };
 
           api
@@ -729,7 +624,6 @@ function onEmpleadoChanged() {
   registro.value.nombre = empleadoModel.value.nombre;
   registro.value.apellidos = empleadoModel.value.apellidos;
   registro.value.email = empleadoModel.value.email;
-  registro.value.telefono = empleadoModel.value.telefono;
 }
 </script>
 
@@ -792,7 +686,6 @@ function onEmpleadoChanged() {
             color="green-10"
             label="Agregar Usuario"
             @click="onClickNuevo"
-            v-if="permNuevo"
           >
           </q-btn>
           <q-btn
@@ -800,7 +693,6 @@ function onEmpleadoChanged() {
             color="primary"
             label="Cambiar contraseña"
             @click="onClickContrasena"
-            v-if="permCambiarContrasena"
           >
           </q-btn>
           <q-btn
@@ -808,7 +700,6 @@ function onEmpleadoChanged() {
             color="red-10"
             label="Eliminar Usuario(s)"
             @click="onClickEliminar"
-            v-if="permEliminar"
           >
           </q-btn>
         </q-card-actions>
@@ -847,50 +738,26 @@ function onEmpleadoChanged() {
         <q-card-section class="q-pa-none">
           <div class="row">
             <div class="col-12 col-md-6 q-pa-sm">
-              <q-select
-                outlined
-                v-model="empleadoModel"
-                :options="opcionesEmpleadoFiltrado"
-                label="Nombre de Empleado"
-                option-label="nombreCompleto"
-                option-value="idEmpleado"
-                @update:model-value="onEmpleadoChanged"
-                @filter="filtrarEmpleado"
-                use-input
-                fill-input
-                hide-selected
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      No hay resultados
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-            <div class="col-12 col-md-6 q-pa-sm">
               <q-input
                 outlined
-                label="No. Empleado"
+                label="No. Empleado/Usuario"
                 v-model="registro.login"
-                :readonly="empleadoModel.idEmpleado != 0"
                 ref="refLogin"
+                :disable="registro.idUsuario > 0"
                 :rules="[(val) => !!val || 'El no. de empleado es requerido']"
               />
             </div>
-          </div>
-          <div class="row">
             <div class="col-12 col-md-6 q-pa-sm">
               <q-input
                 outlined
                 label="Nombre"
                 v-model="registro.nombre"
                 ref="refNombre"
-                :readonly="empleadoModel.idEmpleado != 0"
                 :rules="[(val) => !!val || 'El nombre es requerido']"
               />
             </div>
+          </div>
+          <div class="row">
             <div class="col-12 col-md-6 q-pa-sm">
               <q-input
                 outlined
@@ -900,8 +767,6 @@ function onEmpleadoChanged() {
                 :rules="[(val) => !!val || 'El apellido paterno es requerido']"
               />
             </div>
-          </div>
-          <div class="row">
             <div class="col-12 col-md-6 q-pa-sm">
               <q-select
                 outlined
@@ -912,38 +777,20 @@ function onEmpleadoChanged() {
                 option-value="idGrupo"
               />
             </div>
+          </div>
+          <div class="row">
             <div class="col-12 col-md-6 q-pa-sm">
               <q-input
                 outlined
                 label="Correo"
                 v-model="registro.email"
                 ref="refCorreo"
-                :readonly="empleadoModel.idEmpleado != 0"
                 type="email"
                 :rules="[
                   (val) =>
                     new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(val) ||
                     val.length == 0 ||
                     'El e-mail ingresado no es válido',
-                ]"
-                lazy-rules
-              />
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12 col-md-6 q-pa-sm">
-              <q-input
-                outlined
-                label="Teléfono"
-                v-model="registro.telefono"
-                :readonly="empleadoModel.idEmpleado != 0"
-                type="tel"
-                maxlength="10"
-                :rules="[
-                  (val) =>
-                    new RegExp('[0-9]{10}').test(val) ||
-                    val.length == 0 ||
-                    'Debe ingresar 10 dígitos',
                 ]"
                 lazy-rules
               />
@@ -970,7 +817,6 @@ function onEmpleadoChanged() {
             label="Aceptar"
             color="primary"
             @click="onClickGuardar"
-            v-if="permGuardar"
             icon="check"
           />
         </q-card-actions>
@@ -1032,7 +878,6 @@ function onEmpleadoChanged() {
             label="Aceptar"
             color="primary"
             @click="onClickGuardarContra"
-            v-if="permGuardar"
             icon="check"
           />
         </q-card-actions>

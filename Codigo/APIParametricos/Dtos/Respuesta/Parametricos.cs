@@ -34,4 +34,15 @@
     {
         public List<DatosParametricos.Entidades.TipoObra>? TiposObra { get; set; }
     }
+
+    public class RespuestaActualizacion()
+    {
+        public string resultado {  get; set; }
+        public List<MensajeError> errores { get; set; }
+    }
+
+    public class MensajeError
+    {
+        public string error {  get; set; }
+    }
 }

@@ -220,43 +220,6 @@ export function formatoMoneda(Numero) {
   }).format(Numero);
 }
 
-export function revisarPermisos(idGrupo, pantalla, ...ObjyAccs) {
-  const req = {
-    idGrupo: idGrupo,
-    pantalla: pantalla,
-    accion: null,
-  };
-
-  api
-    .post("/accion/AccionXPantallaXGrupoSelect", req, {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-    .then((response) => {
-      var resp = response.data;
-
-      if (resp.codigo == 1) {
-        //console.log(req);
-        //console.log(resp);
-        for (let i = 0; i < ObjyAccs.length; i += 2) {
-          ObjyAccs[i].value =
-            resp.acciones.filter((obj) => {
-              return obj.accion == ObjyAccs[i + 1];
-            }).length > 0;
-        }
-        //console.log(ObjyAccs);
-      } else {
-        console.log(resp.mensaje);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-    .finally(() => {});
-}
-
 export function obtenerParametroURL(Parametro, Default) {
   var params = new URLSearchParams(window.location.href.split("?")[1]);
   return params.get(Parametro) ?? Default;
@@ -274,79 +237,6 @@ export function isValidEmail(email) {
   const regex = /^[A-Za-z0-9+_.-]+@(.+)$/;
   if (email.length > 0) return regex.test(email);
   else return true;
-}
-
-export async function obtenerKilometrajeGPS(noEconomico) {
-  var respuesta = { kilometraje: 0, mensaje: "" };
-
-  var nameNumber =
-    noEconomico.indexOf("-") >= 0
-      ? noEconomico.substring(noEconomico.indexOf("-") + 1, 100)
-      : noEconomico;
-
-  const req = {
-    imei: "",
-    type: "s",
-    nameNumber: nameNumber,
-  };
-
-  //console.log(req);
-
-  await api
-    .post("/util/ConsultarGPS", req, {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-    .then((response) => {
-      var resp = response.data;
-
-      if (resp.codigo == 1) {
-        respuesta.kilometraje = resp.unidadesGps[0].odometro;
-        respuesta.mensaje = "ok";
-      } else {
-        respuesta.kilometraje = 0;
-        respuesta.mensaje = resp.mensaje;
-      }
-    })
-    .catch((error) => {
-      respuesta.kilometraje = 0;
-      respuesta.mensaje = error;
-    });
-
-  return respuesta;
-}
-
-export function enviarNotificacion(idCita, tipo) {
-  enviarNotificacionComentario(idCita, tipo, "");
-}
-
-export function enviarNotificacionComentario(idCita, tipo, comentario) {
-  const req = {
-    idCita: idCita,
-    tipo: tipo,
-    comentario: comentario,
-  };
-  //console.log(req);
-  api
-    .post("/util/EnviarNotificacion", req, {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-    .then((response) => {
-      var resp = response.data;
-
-      if (resp.codigo != 1) {
-        console.log(resp.mensaje);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-    .finally(() => {});
 }
 
 export function obtenerIds(Arreglo, CampoId) {

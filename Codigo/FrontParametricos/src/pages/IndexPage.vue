@@ -54,24 +54,6 @@ function ValidarUsuario() {
             "iddepartamento",
             resp.usuarios[0].idDepartamento ?? 0
           );
-          $q.localStorage.set("idempleado", resp.usuarios[0].idEmpleado ?? 0);
-
-          $q.localStorage.set(
-            "idempleado",
-            resp.usuarios[0].idEmpleado == null
-              ? 0
-              : resp.usuarios[0].idEmpleado
-          );
-          $q.localStorage.set(
-            "iddepartamento",
-            resp.usuarios[0].idDepartamento == null
-              ? 0
-              : resp.usuarios[0].idDepartamento
-          );
-          $q.localStorage.set(
-            "idtaller",
-            resp.usuarios[0].idTaller == null ? 0 : resp.usuarios[0].idTaller
-          );
 
           guardarLogSistema(
             resp.usuarios[0].idUsuario,
@@ -118,7 +100,7 @@ function ValidarUsuario() {
           //);
 
           //Desarrollo
-          window.location = "/#/PaginaInicio";
+          window.location = "/#/Operacion/CalcularParametricos";
           //Certificación ITSSA
           //window.location = "/Parametricos/#/PaginaInicio";
           //Certificación SAPAL
@@ -142,24 +124,24 @@ function ValidarUsuario() {
 
 //Eventos
 onMounted(() => {
-  //if (($q.localStorage.getItem("idusuario") ?? "0") != "0") {
-  //  guardarLogSistema(
-  //    parseInt($q.localStorage.getItem("idusuario")),
-  //    "/Login",
-  //    "Iniciar Sesión",
-  //    "Usuario inició sesión",
-  //    "Información"
-  //  );
+  if (($q.localStorage.getItem("idusuario") ?? "0") != "0") {
+    guardarLogSistema(
+      parseInt($q.localStorage.getItem("idusuario")),
+      "/Login",
+      "Iniciar Sesión",
+      "Usuario inició sesión",
+      "Información"
+    );
 
-  //Desarrollo
-  window.location = "/#/Operacion/CalcularParametricos";
-  //Certificación ITSSA
-  //window.location = "/Parametricos/#/PaginaInicio";
-  //Certificación SAPAL
-  //window.location = "/Parametricos/#/PaginaInicio";
-  //Producción
-  //window.location = "/Parametricos/#/PaginaInicio";
-  //}
+    //Desarrollo
+    window.location = "/#/PaginaInicio";
+    //Certificación ITSSA
+    //window.location = "/Parametricos/#/PaginaInicio";
+    //Certificación SAPAL
+    //window.location = "/Parametricos/#/PaginaInicio";
+    //Producción
+    //window.location = "/Parametricos/#/PaginaInicio";
+  }
 });
 
 const handleEnterKey = () => {

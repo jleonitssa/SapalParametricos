@@ -1,4 +1,5 @@
 ﻿using DatosParametricos.Entidades;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatosParametricos.Operaciones
@@ -17,6 +18,14 @@ namespace DatosParametricos.Operaciones
             var respuesta = context.LineasTrabajo.FromSql<LineaTrabajo>($"EXEC dbo.procLineaTrabajoSelect @IDLineaTrabajo={IDLineaTrabajo}, @Nombre={Nombre}, @IDClaveTrabajo={IDClaveTrabajo}, @InitRow={InitRow}, @EndRow={EndRow}, @SortColumn={SortColumn}, @SortDir={SortDir}").AsEnumerable<LineaTrabajo>().ToList();
 
             return respuesta;
+        }
+
+        public static int RelacionFinalPrecioImportar(string LineaTrabajo, string TipoObra, string TipoMaterial, string Tuberia, string Diametro, string Excavacion, decimal Precio, ApplicationDbContext context)
+        {
+            var ret = new SqlParameter { ParameterName = "Ret", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
+            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procRelacionFinalPrecioImportar @LineaTrabajo='{LineaTrabajo}', @TipoObra='{TipoObra}', @TipoMaterial='{TipoMaterial}', @Tuberia='{Tuberia}', @Diametro='{Diametro}', @Excavacion='{Excavacion}', @Precio={Precio}", ret);
+
+            return (int)ret.Value;
         }
 
         public static List<RelacionFinalPrecio> RelacionFinalPrecioSelect(int IDRelacion, int IDRelacionDiametro, int IDTipoMaterial, int IDExcavacion, int InitRow, int EndRow, string SortColumn, string SortDir, ApplicationDbContext context)

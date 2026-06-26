@@ -37,7 +37,53 @@
           </q-item-section></q-item
         >
 
-        <MenusPadre v-for="link in linksList" :key="link.title" v-bind="link" />
+        <q-item clickable @click="abrirCalculoParametricos">
+          <q-item-section avatar>
+            <q-icon name="calculate" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Calcular Paramétricos</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          v-if="$q.localStorage.getItem('idgrupo') == 1"
+          clickable
+          @click="abrirUsuarios"
+        >
+          <q-item-section avatar>
+            <q-icon name="group" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Usuarios</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          v-if="$q.localStorage.getItem('idgrupo') == 1"
+          clickable
+          @click="abrirActualizar"
+        >
+          <q-item-section avatar>
+            <q-icon name="settings" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Actualizar Parámetros</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          v-if="$q.localStorage.getItem('idgrupo') == 1"
+          clickable
+          @click="abrirLogSistema"
+        >
+          <q-item-section avatar>
+            <q-icon name="list_alt" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Log del Sistema</q-item-label>
+          </q-item-section>
+        </q-item>
 
         <q-item
           clickable
@@ -63,8 +109,6 @@
 <script setup>
 import { ref } from "vue";
 import { useQuasar } from "quasar";
-import { api } from "boot/axios";
-import MenusPadre from "src/components/MenusPadre.vue";
 
 const $q = useQuasar();
 
@@ -90,45 +134,26 @@ else {
   }
 }
 
-const linksList = ref({});
-
-//console.log($q.localStorage.getItem("appMenu"));
-
-if (
-  !$q.localStorage.hasItem("appMenu") ||
-  $q.localStorage.getItem("appMenu") == ""
-) {
-  const req = {
-    idGrupo: parseInt($q.localStorage.getItem("idgrupo")),
-  };
-
-  api
-    .post("/menu/MenuArmadoXPermisos", req, {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-    .then((response) => {
-      var resp = response.data;
-
-      if (resp.resultado == 1) {
-        $q.localStorage.set("appMenu", JSON.stringify(resp.menus));
-        linksList.value = JSON.parse($q.localStorage.getItem("appMenu"));
-      } else {
-        console.log(resp.mensaje);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-    .finally(() => {});
-} else linksList.value = JSON.parse($q.localStorage.getItem("appMenu"));
-
 const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function abrirCalculoParametricos() {
+  window.location = "/#/Operacion/CalcularParametricos";
+}
+
+function abrirUsuarios() {
+  window.location = "/#/Configuracion/Usuarios";
+}
+
+function abrirLogSistema() {
+  window.location = "/#/Reportes/LogSistema";
+}
+
+function abrirActualizar() {
+  window.location = "/#/Operacion/ActualizarParametros";
 }
 
 function cerrarSesion() {
@@ -138,9 +163,6 @@ function cerrarSesion() {
   $q.localStorage.set("nombre", "");
   $q.localStorage.set("grupo", "");
   $q.localStorage.set("idgrupo", 0);
-  $q.localStorage.set("idempleado", 0);
-  $q.localStorage.set("iddepartamento", 0);
-  $q.localStorage.set("idtaller", 0);
 
   $q.localStorage.set("appMenu", "");
 
