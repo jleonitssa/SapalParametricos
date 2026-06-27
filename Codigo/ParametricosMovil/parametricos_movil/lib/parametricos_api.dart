@@ -4,13 +4,34 @@ class ParametricosApi {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl:
-          'https://localhost:7081/',
+        //'https://localhost:7081/',
+        'https://shakeable-unlabeled-na.ngrok-free.dev/',
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
     ),
   );
+
+  Future<Map<String, dynamic>> inicioDeSesion({
+    String? login,
+    String? pass,
+  }) async {
+    try {
+      final response = await _dio.post(
+        "/usuario/UsuarioValidarSesion",
+        data: {
+          "login": login, 
+          "pass": pass
+        },
+      );
+
+      return response.data;
+      
+    } catch (e) {
+      return {"error": "Error: $e"};
+    }
+  }
 
   Future<List<dynamic>> obtenerExcavacion() async {
     try {
