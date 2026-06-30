@@ -144,10 +144,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: azulClaro.withOpacity(0.10),
+                            color: azulProfundo.withOpacity(0.20),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(
-                              color: blancoSuave.withOpacity(0.4),
+                              color: blancoSuave.withOpacity(0.2),
                               width: 0.5,
                             ),
                           ),

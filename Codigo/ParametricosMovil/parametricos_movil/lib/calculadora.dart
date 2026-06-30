@@ -510,19 +510,44 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
 
                   const SizedBox(height: 20),
 
-                  // BOTÓN BUSCAR
+                  // BOTÓN BUSCAR / CALCULAR
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
                       icon: const Icon(Icons.calculate_outlined),
-                      label: Text('Buscar Precios', style: baseTextStyle.copyWith(fontWeight: FontWeight.w600)),
+                      label: Text('Calcular Precios', style: baseTextStyle.copyWith(fontWeight: FontWeight.w600)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
+                      onPressed: () {
+                        // 1. Extraemos y limpiamos el texto de los metros (quitando espacios o texto si lo hay)
+                        final String metrosTexto = metrosController.text.trim();
+                        
+                        // 2. Extraemos el texto del precio eliminando el signo '$' y las comas de formato para poder parsearlo
+                        final String precioTexto = precioController.text
+                            .replaceAll('\$', '')
+                            .replaceAll(',', '')
+                            .trim();
+
+                        // 3. Intentamos convertir a números reales (double). Si no son válidos, por defecto usamos 0.0
+                        final double cantidadMetros = double.tryParse(metrosTexto) ?? 0.0;
+                        final double precioPorMetro = double.tryParse(precioTexto) ?? 0.0;
+
+                        // 4. Realizamos la operación matemática
+                        final double resultadoTotal = cantidadMetros * precioPorMetro;
+
+                        // 5. Actualizamos el estado y formateamos el resultado con dos decimales y comas
+                        setState(() {
+                          // Opción A: Si usas un controlador para pintar el total en un TextField:
+                          totalController.text = '\$ ${resultadoTotal.toStringAsFixed(2)}';
+                          
+                          // Opción B: Si usas una variable String simple para pintarla en un Text():
+                          // cadenaTotal = '\$ ${resultadoTotal.toStringAsFixed(2)}';
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(height: 80),
