@@ -115,6 +115,11 @@ const $q = useQuasar();
 const usuario = ref("");
 const grupo = ref("");
 
+//Desarrollo
+const ruta = ref("");
+//Certificación ITSSA
+//const ruta = ref("/Parametricos");
+
 defineOptions({
   name: "MainLayout",
 });
@@ -141,19 +146,19 @@ function toggleLeftDrawer() {
 }
 
 function abrirCalculoParametricos() {
-  window.location = "/#/Operacion/CalcularParametricos";
+  window.location = ruta.value + "/#/Operacion/CalcularParametricos";
 }
 
 function abrirUsuarios() {
-  window.location = "/#/Configuracion/Usuarios";
+  window.location = ruta.value + "/#/Configuracion/Usuarios";
 }
 
 function abrirLogSistema() {
-  window.location = "/#/Reportes/LogSistema";
+  window.location = ruta.value + "/#/Reportes/LogSistema";
 }
 
 function abrirActualizar() {
-  window.location = "/#/Operacion/ActualizarParametros";
+  window.location = ruta.value + "/#/Operacion/ActualizarParametros";
 }
 
 function cerrarSesion() {
@@ -169,10 +174,10 @@ function cerrarSesion() {
   //Desarrollo
   window.location = "/#/";
   //Certificación ITSSA
-  //window.location = "/ControlVehicular/#/";
+  //window.location = "/Parametricos/#/";
   //Certificación SAPAL
-  //window.location = "/ControlVehicularFront/#/";
+  //window.location = "/Parametricos/#/";
   //Producción
-  //window.location = "/ControlVehicular/#/";
+  //window.location = "/Parametricos/#/";
 }
 </script>

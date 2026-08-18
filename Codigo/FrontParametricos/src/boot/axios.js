@@ -12,7 +12,7 @@ import axios from "axios";
 const api = axios.create({ baseURL: "https://localhost:7081" });
 //Certificación ITSSA
 //const api = axios.create({
-//  baseURL: "http://187.188.214.154/APIParametricos",
+//  baseURL: "http://187.188.214.154/ParametricosApi",
 //});
 //Certificación SAPAL
 //const api = axios.create({

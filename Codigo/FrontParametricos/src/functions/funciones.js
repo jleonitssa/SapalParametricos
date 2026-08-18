@@ -33,6 +33,43 @@ export function mostrarMensaje(titulo, mensaje, tipo) {
   });
 }
 
+export function revisarPermisos(idGrupo, pantalla, ...ObjyAccs) {
+  const req = {
+    idGrupo: idGrupo,
+    pantalla: pantalla,
+    accion: null,
+  };
+
+  api
+    .post("/accion/AccionXPantallaXGrupoSelect", req, {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    })
+    .then((response) => {
+      var resp = response.data;
+
+      if (resp.codigo == 1) {
+        //console.log(req);
+        //console.log(resp);
+        for (let i = 0; i < ObjyAccs.length; i += 2) {
+          ObjyAccs[i].value =
+            resp.acciones.filter((obj) => {
+              return obj.accion == ObjyAccs[i + 1];
+            }).length > 0;
+        }
+        //console.log(ObjyAccs);
+      } else {
+        console.log(resp.mensaje);
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+    .finally(() => {});
+}
+
 export function guardarLogSistema(
   idUsuario,
   pantalla,

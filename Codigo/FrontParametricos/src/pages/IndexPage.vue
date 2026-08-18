@@ -68,7 +68,7 @@ function ValidarUsuario() {
           //Certificación ITSSA
           //$q.localStorage.set(
           //  "urlImagenes",
-          //  "http://187.188.214.154/APIParametricos"
+          //  "http://187.188.214.154/ParametricosApi"
           //);
           //Certificación SAPAL
           //$q.localStorage.set(
@@ -86,7 +86,7 @@ function ValidarUsuario() {
           //Certificación ITSSA
           //$q.localStorage.set(
           //  "urlPlantillas",
-          //  "http://187.188.214.154/APIParametricos"
+          //  "http://187.188.214.154/ParametricosApi"
           //);
           //Certificación SAPAL
           //$q.localStorage.set(
