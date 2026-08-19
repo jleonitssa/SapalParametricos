@@ -649,7 +649,8 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
+                        //'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
+                        'http://187.188.214.154/ParametricosApi/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
                         height: 230,
                         fit: BoxFit.contain,
                         // Manejo de error por si el archivo no se encuentra o está mal escrito
@@ -696,7 +697,8 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                                         minScale: 0.5,    // Escala mínima (alejar)
                                         maxScale: 4.0,    // Escala máxima (acercar)
                                         child: Image.network(
-                                          'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
+                                          //'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
+                                          'http://187.188.214.154/ParametricosApi/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -809,7 +811,7 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                   ),
                   onChanged: (value) {
                     // Aquí capturas lo que el usuario escriba para tus cálculos en tiempo real
-                    print("Metros ingresados: $value");
+                    //print("Metros ingresados: $value");
                   },
                 ),
               ),
@@ -841,7 +843,7 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
-                      print("Precio ingresado: $value");
+                      //print("Precio ingresado: $value");
                     },
                   ),
                 ),
@@ -874,7 +876,7 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
-                      print("Total calculado: $value");
+                      //print("Total calculado: $value");
                     },
                   ),
                 ),
