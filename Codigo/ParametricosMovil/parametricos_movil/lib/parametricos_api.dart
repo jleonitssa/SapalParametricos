@@ -5,7 +5,8 @@ class ParametricosApi {
     BaseOptions(
       baseUrl:
         //'https://localhost:7081/',
-        'https://shakeable-unlabeled-na.ngrok-free.dev/',
+        //'https://shakeable-unlabeled-na.ngrok-free.dev/',
+        'http://187.188.214.154/ParametricosApi/',
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
