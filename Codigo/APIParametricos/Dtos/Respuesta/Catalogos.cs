@@ -1,5 +1,15 @@
 ﻿namespace APIParametricos.Dtos.Respuesta
 {
+    public class RespuestaClaveTrabajo : Respuesta
+    {
+        public List<DatosParametricos.Entidades.ClaveTrabajo>? ClavesTrabajo { get; set; }
+    }
+
+    public class RespuestaDiametro : Respuesta
+    {
+        public List<DatosParametricos.Entidades.Diametro>? Diametros { get; set; }
+    }
+
     public class RespuestaExcavacion : Respuesta
     {
         public List<DatosParametricos.Entidades.Excavacion>? Excavaciones { get; set; }
@@ -33,6 +43,11 @@
     public class RespuestaTipoObra : Respuesta
     {
         public List<DatosParametricos.Entidades.TipoObra>? TiposObra { get; set; }
+    }
+
+    public class RespuestaTuberia : Respuesta
+    {
+        public List<DatosParametricos.Entidades.Tuberia>? Tuberias { get; set; }
     }
 
     public class RespuestaActualizacion()

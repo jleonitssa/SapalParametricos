@@ -25,7 +25,9 @@ namespace DatosParametricos
         }
 
         public DbSet<Excavacion> Excavaciones { get; set; }
+        public DbSet<ClaveTrabajo> ClavesTrabajo { get; set; }
         public DbSet<Configuracion> Configs { get; set; }
+        public DbSet<Diametro> Diametros { get; set; }
         public DbSet<Grupo> Grupos { get; set; }
         public DbSet<LogSistema> Logs { get; set; }
         public DbSet<LineaTrabajo> LineasTrabajo { get; set; }
@@ -35,6 +37,7 @@ namespace DatosParametricos
         public DbSet<RelacionObraDiametro> RelacionesObraDiametro { get; set; }
         public DbSet<TipoMaterial> TiposMaterial { get; set; }
         public DbSet<TipoObra> TiposObra { get; set; }
+        public DbSet<Tuberia> Tuberias { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
     }
 }
