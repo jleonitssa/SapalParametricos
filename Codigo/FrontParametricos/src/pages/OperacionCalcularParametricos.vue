@@ -105,10 +105,18 @@ const cTotal = computed(() => {
 
 //Watchers
 watch(modelLinea, async () => {
-  const req = { idClaveTrabajo: modelLinea.value.idClaveTrabajo };
+  const req = {
+    idTipoObra: 0,
+    idClaveTrabajo: modelLinea.value.idClaveTrabajo,
+    nombre: "",
+    initRow: 1,
+    endRow: 100,
+    sortColumn: "idTipoObra",
+    sortDir: "ASC",
+  };
 
   api
-    .post("/parametricos/TipoObraSelect", req, {
+    .post("/tipoobra/TipoObraSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -132,12 +140,18 @@ watch(modelLinea, async () => {
 
 watch(modelObra, async () => {
   const req = {
+    idRelacion: 0,
     idLineaTrabajo: modelLinea.value.idLineaTrabajo,
     idTipoObra: modelObra.value.idTipoObra,
+    idTuberia: 0,
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idRelacion",
+    sortDir: "ASC",
   };
 
   api
-    .post("/parametricos/RelacionLineaObraTuberiaSelect", req, {
+    .post("/relacionlineaobratuberia/RelacionLineaObraTuberiaSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -161,11 +175,17 @@ watch(modelObra, async () => {
 
 watch(modelTuberia, async () => {
   const req = {
+    idRelacion: 0,
     idRelacionObra: modelTuberia.value.idRelacion,
+    idDiametro: 0,
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idRelacion",
+    sortDir: "ASC",
   };
 
   api
-    .post("/parametricos/RelacionObraDiametroSelect", req, {
+    .post("/relacionobradiametro/RelacionObraDiametroSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -201,10 +221,18 @@ watch(modelDiametro, async () => {
 
 //Llamadas a servidor
 async function cargarCombosInicio() {
-  const req = {};
+  const req = {
+    idLineaTrabajo: 0,
+    nombre: "",
+    idClaveTrabajo: 0,
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idLineaTrabajo",
+    sortDir: "ASC",
+  };
 
   api
-    .post("/parametricos/LineaTrabajoSelect", req, {
+    .post("/lineatrabajo/LineaTrabajoSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -225,8 +253,17 @@ async function cargarCombosInicio() {
     })
     .finally(() => {});
 
+  const reqtm = {
+    idTipoMaterial: 0,
+    nombre: "",
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idTipoMaterial",
+    sortDir: "ASC",
+  };
+
   api
-    .post("/parametricos/TipoMaterialSelect", req, {
+    .post("/tipomaterial/TipoMaterialSelect", reqtm, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -247,8 +284,17 @@ async function cargarCombosInicio() {
     })
     .finally(() => {});
 
+  const reqe = {
+    idExcavacion: 0,
+    nombre: "",
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idExcavacion",
+    sortDir: "ASC",
+  };
+
   api
-    .post("/parametricos/ExcavacionSelect", req, {
+    .post("/excavacion/ExcavacionSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -272,13 +318,18 @@ async function cargarCombosInicio() {
 
 function encontrarPrecioFinal() {
   const req = {
+    idRelacion: 0,
     idRelacionDiametro: modelDiametro.value.idRelacion,
     idTipoMaterial: modelMaterial.value.idTipoMaterial,
     idExcavacion: modelExcavacion.value.idExcavacion,
+    initRow: 0,
+    endRow: 100,
+    sortColumn: "idRelacion",
+    sortDir: "ASC",
   };
 
   api
-    .post("/parametricos/RelacionFinalPrecioSelect", req, {
+    .post("/relacionfinalprecio/RelacionFinalPrecioSelect", req, {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",

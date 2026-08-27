@@ -25,12 +25,17 @@ BEGIN
 	(
 		SELECT	lt.*,
 				ct.Incluye,
+				ct.Clave,
 					ROW_NUMBER() OVER (ORDER BY	CASE WHEN @SortColumn = 'IDLineaTrabajo' AND @SortDir = 'ASC' THEN IDLineaTrabajo END ASC,
 												CASE WHEN @SortColumn = 'IDLineaTrabajo' AND @SortDir = 'DESC' THEN IDLineaTrabajo END DESC,
 												CASE WHEN @SortColumn = 'Nombre' AND @SortDir = 'ASC' THEN Nombre END ASC,
 												CASE WHEN @SortColumn = 'Nombre' AND @SortDir = 'DESC' THEN Nombre END DESC,
 												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'ASC' THEN lt.IDClaveTrabajo END ASC,
 												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'DESC' THEN lt.IDClaveTrabajo END DESC,
+												CASE WHEN @SortColumn = 'Incluye' AND @SortDir = 'ASC' THEN Incluye END ASC,
+												CASE WHEN @SortColumn = 'Incluye' AND @SortDir = 'DESC' THEN Incluye END DESC,
+												CASE WHEN @SortColumn = 'Clave' AND @SortDir = 'ASC' THEN Clave END ASC,
+												CASE WHEN @SortColumn = 'Clave' AND @SortDir = 'DESC' THEN Clave END DESC,
 												CASE WHEN @SortColumn IS NULL OR @SortDir IS NULL THEN IDLineaTrabajo END ASC) AS ROWID 
 	 	FROM	dbo.LineaTrabajo lt
 		JOIN	dbo.ClaveTrabajo ct ON ct.IDClaveTrabajo = lt.IDClaveTrabajo

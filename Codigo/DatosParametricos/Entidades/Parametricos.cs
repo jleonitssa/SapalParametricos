@@ -38,6 +38,7 @@ namespace DatosParametricos.Entidades
         public int IDLineaTrabajo { get; set; }
         public string Nombre { get; set; }
         public string Incluye { get; set; }
+        public string Clave { get; set; }
         public int IDClaveTrabajo { get; set; }
     }
     #endregion
@@ -95,6 +96,8 @@ namespace DatosParametricos.Entidades
         public int IDTipoObra { get; set; }
         public int IDClaveTrabajo { get; set; }
         public string Nombre { get; set; }
+        public string Incluye { get; set; }
+        public string Clave { get; set; }
     }
     #endregion
 

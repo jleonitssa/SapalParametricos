@@ -23,16 +23,24 @@ BEGIN
 	SELECT *
 	FROM
 	(
-		SELECT	*, ROW_NUMBER() OVER (ORDER BY	CASE WHEN @SortColumn = 'IDTipoObra' AND @SortDir = 'ASC' THEN IDTipoObra END ASC,
+		SELECT	tb.*,
+				ct.Clave,
+				ct.Incluye,
+					ROW_NUMBER() OVER (ORDER BY	CASE WHEN @SortColumn = 'IDTipoObra' AND @SortDir = 'ASC' THEN IDTipoObra END ASC,
 												CASE WHEN @SortColumn = 'IDTipoObra' AND @SortDir = 'DESC' THEN IDTipoObra END DESC,
-												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'ASC' THEN IDClaveTrabajo END ASC,
-												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'DESC' THEN IDClaveTrabajo END DESC,
+												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'ASC' THEN tb.IDClaveTrabajo END ASC,
+												CASE WHEN @SortColumn = 'IDClaveTrabajo' AND @SortDir = 'DESC' THEN tb.IDClaveTrabajo END DESC,
 												CASE WHEN @SortColumn = 'Nombre' AND @SortDir = 'ASC' THEN Nombre END ASC,
 												CASE WHEN @SortColumn = 'Nombre' AND @SortDir = 'DESC' THEN Nombre END DESC,
+												CASE WHEN @SortColumn = 'Incluye' AND @SortDir = 'ASC' THEN Incluye END ASC,
+												CASE WHEN @SortColumn = 'Incluye' AND @SortDir = 'DESC' THEN Incluye END DESC,
+												CASE WHEN @SortColumn = 'Clave' AND @SortDir = 'ASC' THEN Clave END ASC,
+												CASE WHEN @SortColumn = 'Clave' AND @SortDir = 'DESC' THEN Clave END DESC,
 												CASE WHEN @SortColumn IS NULL OR @SortDir IS NULL THEN IDTipoObra END ASC) AS ROWID 
-	 	FROM	dbo.TipoObra
+	 	FROM	dbo.TipoObra tb
+		JOIN	dbo.ClaveTrabajo ct ON ct.IDClaveTrabajo = tb.IDClaveTrabajo
 	 	WHERE	(ISNULL(@IDTipoObra, 0) = 0 OR IDTipoObra = @IDTipoObra) AND 
-				(ISNULL(@IDClaveTrabajo, 0) = 0 OR IDClaveTrabajo = @IDClaveTrabajo) AND 
+				(ISNULL(@IDClaveTrabajo, 0) = 0 OR ct.IDClaveTrabajo = @IDClaveTrabajo) AND 
 				(ISNULL(@Nombre, '') = '' OR Nombre LIKE '%' + @Nombre + '%')
 	)TAB1
 	WHERE	(@InitRow IS NULL OR ROWID >= @InitRow) 

@@ -72,6 +72,40 @@
           </q-item-section>
         </q-item>
 
+        <q-expansion-item
+          expand-separator
+          icon="library_books"
+          label="Catálogos"
+          v-if="$q.localStorage.getItem('idgrupo') == 1"
+        >
+          <q-item clickable @click="abrirCatalogos(1)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Clave de Trabajo</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(2)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Línea de Trabajo</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(3)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Tipo de Obra</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
         <q-item
           v-if="$q.localStorage.getItem('idgrupo') == 1"
           clickable
@@ -151,6 +185,20 @@ function abrirCalculoParametricos() {
 
 function abrirUsuarios() {
   window.location = ruta.value + "/#/Configuracion/Usuarios";
+}
+
+function abrirCatalogos(Tipo) {
+  switch (Tipo) {
+    case 1:
+      window.location = ruta.value + "/#/Catalogos/ClaveTrabajo";
+      break;
+    case 2:
+      window.location = ruta.value + "/#/Catalogos/LineaTrabajo";
+      break;
+    case 3:
+      window.location = ruta.value + "/#/Catalogos/TipoObra";
+      break;
+  }
 }
 
 function abrirLogSistema() {

@@ -47,6 +47,25 @@ const routes = [
       },
     ],
   },
+  ,
+  {
+    path: "/Catalogos",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [
+      {
+        path: "ClaveTrabajo",
+        component: () => import("src/pages/CatalogosClaveTrabajo.vue"),
+      },
+      {
+        path: "LineaTrabajo",
+        component: () => import("src/pages/CatalogosLineaTrabajo.vue"),
+      },
+      {
+        path: "TipoObra",
+        component: () => import("src/pages/CatalogosTipoObra.vue"),
+      },
+    ],
+  },
   {
     path: "/Operacion",
     component: () => import("layouts/MainLayout.vue"),
