@@ -1,8 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'parametricos_api.dart';
-import 'dart:ui';
 
-// 1. Cambiamos a StatefulWidget
 class ConstruccionScreen extends StatefulWidget {
   const ConstruccionScreen({super.key});
 
@@ -11,556 +10,1534 @@ class ConstruccionScreen extends StatefulWidget {
 }
 
 class _ConstruccionScreenState extends State<ConstruccionScreen> {
+  final ParametricosApi apiService = ParametricosApi();
 
- final ParametricosApi apiService = ParametricosApi();
+  final Color primaryBlue = const Color(0xFF003D71);
 
-  final primaryBlue = Color(0xFF003D71); // Azul oscuro de la marca
-
-  // Definimos un estilo de texto limpio usando la fuente del sistema (Roboto/SF Pro)
-  final baseTextStyle = TextStyle(
-    fontFamily: 'sans-serif', // Forzar estética limpia si es necesario
+  final TextStyle baseTextStyle = const TextStyle(
+    fontFamily: 'sans-serif',
   );
 
-  final TextEditingController metrosController = TextEditingController(text: '0');
-  final TextEditingController precioController = TextEditingController(text: '0');
-  final TextEditingController totalController = TextEditingController(text: '0');
+  // ============================================================
+  // EJERCICIOS
+  // ============================================================
 
-  String? textoIncluye;
-  String? textoDescripcion;
+  final List<EjercicioCalculo> listaEjercicios = [
+    EjercicioCalculo(
+      id: 1,
+      isExpanded: true,
+    ),
+  ];
 
-  List<dynamic> lineasTrabajo = [];
-  List<DropdownMenuItem<int>> opcionesLineaTrabajo = [];
-  int? lineaTrabajoSeleccionada;
-  Map<String, dynamic>? objetoCompletoLineaTrabajo;
+  int _siguienteIdEjercicio = 2;
 
-  List<dynamic> tiposMaterial = [];
-  List<DropdownMenuItem<int>> opcionesTipoMaterial = [];
-  int? tipoMaterialSeleccionado;
-  Map<String, dynamic>? objetoCompletoTipoMaterial;
-
-  List<dynamic> tiposObra = [];
-  List<DropdownMenuItem<int>> opcionesTipoObra = [];
-  int? tipoObraSeleccionada;
-  Map<String, dynamic>? objetoCompletoTipoObra;
-
-  List<dynamic> tiposTuberia = [];
-  List<DropdownMenuItem<int>> opcionesTipoTuberia = [];
-  int? tipoTuberiaSeleccionada;
-  Map<String, dynamic>? objetoCompletoTipoTuberia;
-
-  List<dynamic> diametrosTuberia = [];
-  List<DropdownMenuItem<int>> opcionesDiametrosTuberia = [];
-  int? diametroTuberiaSeleccionado;
-  Map<String, dynamic>? objetoCompletoDiametroTuberia;
-
-  List<dynamic> tiposExcavacion = [];
-  List<DropdownMenuItem<int>> opcionesTipoExcavacion = [];
-  int? tipoExcavacionSeleccionada;
-  Map<String, dynamic>? objetoCompletoTipoExcavacion;
-
-  List<dynamic> relacionPrecio = [];
-
-  void cargarLineaTrabajo() async {
-    opcionesLineaTrabajo = await obtenerOpcionesLineaTrabajo();
-/*     if (opcionesLineaTrabajo.isNotEmpty && lineaTrabajoSeleccionada == null) {
-      lineaTrabajoSeleccionada = opcionesLineaTrabajo.first.value;
-    } */
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesLineaTrabajo() async {
-    lineasTrabajo = await apiService.obtenerLineaTrabajo();
-
-    return lineasTrabajo.map<DropdownMenuItem<int>>((linea) {
-      return DropdownMenuItem<int>(
-        value: linea["idLineaTrabajo"],
-        child: Text(
-          linea["nombre"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoLineaSeleccionada() {
-    if (lineaTrabajoSeleccionada == null || lineasTrabajo.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return lineasTrabajo.firstWhere(
-      (linea) => linea["idLineaTrabajo"] == lineaTrabajoSeleccionada,
-      orElse: () => null,
-    );
-  }
-
-  void cargarTipoMaterial() async {
-    opcionesTipoMaterial = await obtenerOpcionesTipoMaterial();
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesTipoMaterial() async {
-    tiposMaterial = await apiService.obtenerTipoMaterial();
-
-    return tiposMaterial.map<DropdownMenuItem<int>>((tipo) {
-      return DropdownMenuItem<int>(
-        value: tipo["idTipoMaterial"],
-        child: Text(
-          tipo["nombre"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoTipoMaterialSeleccionado() {
-    if (tipoMaterialSeleccionado == null || tiposMaterial.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return tiposMaterial.firstWhere(
-      (tipo) => tipo["idTipoMaterial"] == tipoMaterialSeleccionado,
-      orElse: () => null,
-    );
-  }
-  
-  void cargarTipoDeObra(int idClaveTrabajo) async {
-    opcionesTipoObra = await obtenerOpcionesTipoObra(idClaveTrabajo);
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesTipoObra(int idClaveTrabajo) async {
-    tiposObra = await apiService.obtenerTipoObra(idClaveTrabajo: idClaveTrabajo);
-
-    return tiposObra.map<DropdownMenuItem<int>>((tipo) {
-      return DropdownMenuItem<int>(
-        value: tipo["idTipoObra"],
-        child: Text(
-          tipo["nombre"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoTipoObraSeleccionada() {
-    if (tipoObraSeleccionada == null || tiposObra.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return tiposObra.firstWhere(
-      (tipo) => tipo["idTipoObra"] == tipoObraSeleccionada,
-      orElse: () => null,
-    );
-  }
-
-  Future<void> cargarTipoTuberia(int idLineaTrabajo, int idTipoObra) async {
-    opcionesTipoTuberia = await obtenerOpcionesTipoTuberia(idLineaTrabajo, idTipoObra);
-    if (opcionesTipoTuberia.isNotEmpty && tipoTuberiaSeleccionada == null) {
-      tipoTuberiaSeleccionada = opcionesTipoTuberia.first.value;
-    }
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesTipoTuberia(int idLineaTrabajo, int idTipoObra) async {
-    tiposTuberia = await apiService.obtenerRelacionLineaObraTuberia(idLineaTrabajo: idLineaTrabajo, idTipoObra: idTipoObra);
-
-    return tiposTuberia.map<DropdownMenuItem<int>>((tipo) {
-      return DropdownMenuItem<int>(
-        value: tipo["idTuberia"],
-        child: Text(
-          tipo["tuberia"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoTipoTuberiaSeleccionada() {
-    if (tipoTuberiaSeleccionada == null || tiposTuberia.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return tiposTuberia.firstWhere(
-      (tipo) => tipo["idTuberia"] == tipoTuberiaSeleccionada,
-      orElse: () => null,
-    );
-  }
-
-  Future<void> cargarDiametroTuberia(int idRelacionObra) async {
-    opcionesDiametrosTuberia = await obtenerOpcionesDiametroTuberia(idRelacionObra);
-    if (opcionesDiametrosTuberia.isNotEmpty && diametroTuberiaSeleccionado == null) {
-      diametroTuberiaSeleccionado = opcionesDiametrosTuberia.first.value;
-    }
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesDiametroTuberia(int idRelacionObra) async {
-    diametrosTuberia = await apiService.obtenerRelacionObraDiametro(idRelacionObra: idRelacionObra);
-
-    return diametrosTuberia.map<DropdownMenuItem<int>>((tipo) {
-      return DropdownMenuItem<int>(
-        value: tipo["idDiametro"],
-        child: Text(
-          tipo["diametro"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoDiametroTuberiaSeleccionado() {
-    if (diametroTuberiaSeleccionado == null || diametrosTuberia.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return diametrosTuberia.firstWhere(
-      (tipo) => tipo["idDiametro"] == diametroTuberiaSeleccionado,
-      orElse: () => null,
-    );
-  }
-
-  Future<void> cargarTipoExcavacion() async {
-    opcionesTipoExcavacion = await obtenerOpcionesTipoExcavacion();
-    setState(() {});
-  }
-
-  Future<List<DropdownMenuItem<int>>> obtenerOpcionesTipoExcavacion() async {
-    tiposExcavacion = await apiService.obtenerExcavacion();
-
-    return tiposExcavacion.map<DropdownMenuItem<int>>((tipo) {
-      return DropdownMenuItem<int>(
-        value: tipo["idExcavacion"],
-        child: Text(
-          tipo["nombre"],
-          style: const TextStyle(color: Colors.black),
-        ),
-      );
-    }).toList();
-  }
-
-  Map<String, dynamic>? obtenerObjetoTipoExcavacionSeleccionada() {
-    if (tipoExcavacionSeleccionada == null || tiposExcavacion.isEmpty) return null;
-    
-    // Buscamos el mapa que coincida con el ID seleccionado
-    return tiposExcavacion.firstWhere(
-      (tipo) => tipo["idExcavacion"] == tipoExcavacionSeleccionada,
-      orElse: () => null,
-    );
-  }
-
-  Future<void> evaluarYCargarPrecio() async {
-
-    if (objetoCompletoDiametroTuberia != null && objetoCompletoTipoMaterial != null && objetoCompletoTipoExcavacion != null) {
-      
-      try {
-        // 1. Llamamos a tu función pasándole las variables actuales del estado
-        final resultado = await apiService.obtenerRelacionFinalPrecio(
-          idRelacionDiametro: objetoCompletoDiametroTuberia!['idRelacion'],
-          idTipoMaterial: objetoCompletoTipoMaterial!['idTipoMaterial'],
-          idExcavacion: objetoCompletoTipoExcavacion!['idExcavacion'],
-        );
-
-        // 2. Si la API nos responde con éxito, actualizamos la UI con el nuevo precio
-        if (resultado.isNotEmpty) {
-          setState(() {
-            // Asumiento que tu API regresa el campo 'precio' y tienes un precioController
-            precioController.text = '\$ ${resultado[0]['precio']}';
-            textoDescripcion = resultado[0]['descripcion']; 
-          });
-        }
-      } catch (e) {
-        //print("Error al obtener el precio final: $e");
-        precioController.text = '\$ 0.00';
-      }
-
-    } else {
-      // Opcional: Si el usuario deselecciona algo, podemos resetear el precio a $ 0
-      setState(() {
-        precioController.text = '\$ 0.00';
-      });
-    }
-  }
+  // ============================================================
+  // CICLO DE VIDA
+  // ============================================================
 
   @override
   void initState() {
     super.initState();
 
-    precioController.text = '\$ 0.00';
-    totalController.text = '\$ 0.00';
-
-    cargarLineaTrabajo();
-    cargarTipoMaterial();
-    cargarTipoExcavacion();
+    _cargarDatosInicialesEjercicio(listaEjercicios.first);
   }
 
   @override
   void dispose() {
+    for (final ejercicio in listaEjercicios) {
+      ejercicio.dispose();
+    }
+
     super.dispose();
   }
 
+  // ============================================================
+  // AGREGAR EJERCICIO
+  // ============================================================
+
+  void _agregarNuevoEjercicio() {
+    final nuevoEjercicio = EjercicioCalculo(
+      id: _siguienteIdEjercicio++,
+      isExpanded: true,
+    );
+
+    setState(() {
+      listaEjercicios.add(nuevoEjercicio);
+    });
+
+    _cargarDatosInicialesEjercicio(nuevoEjercicio);
+  }
+
+  // ============================================================
+  // ELIMINAR EJERCICIO
+  // ============================================================
+
+  void _eliminarEjercicio(int index) {
+    if (listaEjercicios.length <= 1) {
+      return;
+    }
+
+    final ejercicio = listaEjercicios[index];
+
+    setState(() {
+      listaEjercicios.removeAt(index);
+    });
+
+    ejercicio.dispose();
+  }
+
+  // ============================================================
+  // CARGAR DATOS INICIALES DE CADA EJERCICIO
+  // ============================================================
+
+  Future<void> _cargarDatosInicialesEjercicio(
+    EjercicioCalculo ejercicio,
+  ) async {
+    try {
+      final resultados = await Future.wait([
+        apiService.obtenerLineaTrabajo(),
+        apiService.obtenerTipoMaterial(),
+        apiService.obtenerExcavacion(),
+      ]);
+
+      if (!mounted) {
+        return;
+      }
+
+      // Verificamos que el ejercicio siga existiendo.
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        // Línea de trabajo
+        ejercicio.lineasTrabajo = resultados[0];
+
+        ejercicio.opcionesLineaTrabajo =
+            _crearOpcionesLineaTrabajo(
+          ejercicio.lineasTrabajo,
+        );
+
+        // Tipo de material
+        ejercicio.tiposMaterial = resultados[1];
+
+        ejercicio.opcionesTipoMaterial =
+            _crearOpcionesTipoMaterial(
+          ejercicio.tiposMaterial,
+        );
+
+        // Excavación
+        ejercicio.tiposExcavacion = resultados[2];
+
+        ejercicio.opcionesTipoExcavacion =
+            _crearOpcionesTipoExcavacion(
+          ejercicio.tiposExcavacion,
+        );
+      });
+    } catch (e) {
+      debugPrint(
+        'Error cargando datos iniciales del ejercicio '
+        '${ejercicio.id}: $e',
+      );
+    }
+  }
+
+  // ============================================================
+  // OPCIONES - LÍNEA DE TRABAJO
+  // ============================================================
+
+  List<DropdownMenuItem<int>> _crearOpcionesLineaTrabajo(
+    List<dynamic> datos,
+  ) {
+    return datos.map<DropdownMenuItem<int>>((linea) {
+      return DropdownMenuItem<int>(
+        value: linea['idLineaTrabajo'],
+        child: Text(
+          linea['nombre']?.toString() ?? '',
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  // ============================================================
+  // OPCIONES - TIPO DE MATERIAL
+  // ============================================================
+
+  List<DropdownMenuItem<int>> _crearOpcionesTipoMaterial(
+    List<dynamic> datos,
+  ) {
+    return datos.map<DropdownMenuItem<int>>((tipo) {
+      return DropdownMenuItem<int>(
+        value: tipo['idTipoMaterial'],
+        child: Text(
+          tipo['nombre']?.toString() ?? '',
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  // ============================================================
+  // OPCIONES - TIPO DE EXCAVACIÓN
+  // ============================================================
+
+  List<DropdownMenuItem<int>> _crearOpcionesTipoExcavacion(
+    List<dynamic> datos,
+  ) {
+    return datos.map<DropdownMenuItem<int>>((tipo) {
+      return DropdownMenuItem<int>(
+        value: tipo['idExcavacion'],
+        child: Text(
+          tipo['nombre']?.toString() ?? '',
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - LÍNEA DE TRABAJO
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerLineaSeleccionada(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.lineaTrabajoSeleccionada == null) {
+      return null;
+    }
+
+    for (final linea in ejercicio.lineasTrabajo) {
+      if (linea['idLineaTrabajo'] ==
+          ejercicio.lineaTrabajoSeleccionada) {
+        return Map<String, dynamic>.from(linea);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - MATERIAL
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerMaterialSeleccionado(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.tipoMaterialSeleccionado == null) {
+      return null;
+    }
+
+    for (final tipo in ejercicio.tiposMaterial) {
+      if (tipo['idTipoMaterial'] ==
+          ejercicio.tipoMaterialSeleccionado) {
+        return Map<String, dynamic>.from(tipo);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - TIPO DE OBRA
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerTipoObraSeleccionado(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.tipoObraSeleccionada == null) {
+      return null;
+    }
+
+    for (final tipo in ejercicio.tiposObra) {
+      if (tipo['idTipoObra'] ==
+          ejercicio.tipoObraSeleccionada) {
+        return Map<String, dynamic>.from(tipo);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - TUBERÍA
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerTipoTuberiaSeleccionado(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.tipoTuberiaSeleccionada == null) {
+      return null;
+    }
+
+    for (final tipo in ejercicio.tiposTuberia) {
+      if (tipo['idTuberia'] ==
+          ejercicio.tipoTuberiaSeleccionada) {
+        return Map<String, dynamic>.from(tipo);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - DIÁMETRO
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerDiametroSeleccionado(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.diametroTuberiaSeleccionado == null) {
+      return null;
+    }
+
+    for (final diametro in ejercicio.diametrosTuberia) {
+      if (diametro['idDiametro'] ==
+          ejercicio.diametroTuberiaSeleccionado) {
+        return Map<String, dynamic>.from(diametro);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // OBTENER OBJETO - EXCAVACIÓN
+  // ============================================================
+
+  Map<String, dynamic>? _obtenerExcavacionSeleccionada(
+    EjercicioCalculo ejercicio,
+  ) {
+    if (ejercicio.tipoExcavacionSeleccionada == null) {
+      return null;
+    }
+
+    for (final tipo in ejercicio.tiposExcavacion) {
+      if (tipo['idExcavacion'] ==
+          ejercicio.tipoExcavacionSeleccionada) {
+        return Map<String, dynamic>.from(tipo);
+      }
+    }
+
+    return null;
+  }
+
+  // ============================================================
+  // CARGAR TIPO DE OBRA
+  // ============================================================
+
+  Future<void> _cargarTipoObra(
+    EjercicioCalculo ejercicio,
+    int idClaveTrabajo,
+  ) async {
+    try {
+      final datos = await apiService.obtenerTipoObra(
+        idClaveTrabajo: idClaveTrabajo,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        ejercicio.tiposObra = datos;
+
+        ejercicio.opcionesTipoObra =
+            datos.map<DropdownMenuItem<int>>((tipo) {
+          return DropdownMenuItem<int>(
+            value: tipo['idTipoObra'],
+            child: Text(
+              tipo['nombre']?.toString() ?? '',
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList();
+      });
+    } catch (e) {
+      debugPrint(
+        'Error cargando tipo de obra '
+        'del ejercicio ${ejercicio.id}: $e',
+      );
+    }
+  }
+
+  // ============================================================
+  // CARGAR TIPO DE TUBERÍA
+  // ============================================================
+
+  Future<void> _cargarTipoTuberia(
+    EjercicioCalculo ejercicio,
+    int idLineaTrabajo,
+    int idTipoObra,
+  ) async {
+    try {
+      final datos =
+          await apiService.obtenerRelacionLineaObraTuberia(
+        idLineaTrabajo: idLineaTrabajo,
+        idTipoObra: idTipoObra,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        ejercicio.tiposTuberia = datos;
+
+        ejercicio.opcionesTipoTuberia =
+            datos.map<DropdownMenuItem<int>>((tipo) {
+          return DropdownMenuItem<int>(
+            value: tipo['idTuberia'],
+            child: Text(
+              tipo['tuberia']?.toString() ?? '',
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList();
+
+        // Conservamos el comportamiento original:
+        // seleccionar automáticamente la primera tubería.
+        if (ejercicio.opcionesTipoTuberia.isNotEmpty) {
+          ejercicio.tipoTuberiaSeleccionada =
+              ejercicio.opcionesTipoTuberia.first.value;
+        }
+      });
+    } catch (e) {
+      debugPrint(
+        'Error cargando tipo de tubería '
+        'del ejercicio ${ejercicio.id}: $e',
+      );
+    }
+  }
+
+  // ============================================================
+  // CARGAR DIÁMETROS
+  // ============================================================
+
+  Future<void> _cargarDiametros(
+    EjercicioCalculo ejercicio,
+    int idRelacionObra,
+  ) async {
+    try {
+      final datos =
+          await apiService.obtenerRelacionObraDiametro(
+        idRelacionObra: idRelacionObra,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        ejercicio.diametrosTuberia = datos;
+
+        ejercicio.opcionesDiametrosTuberia =
+            datos.map<DropdownMenuItem<int>>((tipo) {
+          return DropdownMenuItem<int>(
+            value: tipo['idDiametro'],
+            child: Text(
+              tipo['diametro']?.toString() ?? '',
+              style: const TextStyle(
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList();
+
+        // Conservamos el comportamiento original:
+        // seleccionar automáticamente el primer diámetro.
+        if (ejercicio.opcionesDiametrosTuberia.isNotEmpty) {
+          ejercicio.diametroTuberiaSeleccionado =
+              ejercicio.opcionesDiametrosTuberia.first.value;
+        }
+      });
+    } catch (e) {
+      debugPrint(
+        'Error cargando diámetros '
+        'del ejercicio ${ejercicio.id}: $e',
+      );
+    }
+  }
+
+  // ============================================================
+  // OBTENER PRECIO FINAL
+  // ============================================================
+
+  Future<void> _evaluarYCargarPrecio(
+    EjercicioCalculo ejercicio,
+  ) async {
+    final diametro =
+        ejercicio.objetoCompletoDiametroTuberia;
+
+    final material =
+        ejercicio.objetoCompletoTipoMaterial;
+
+    final excavacion =
+        ejercicio.objetoCompletoTipoExcavacion;
+
+    // Todavía no tenemos todos los parámetros.
+    if (diametro == null ||
+        material == null ||
+        excavacion == null) {
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        ejercicio.precioController.text = '\$ 0.00';
+        ejercicio.textoDescripcion = null;
+      });
+
+      return;
+    }
+
+    try {
+      final resultado =
+          await apiService.obtenerRelacionFinalPrecio(
+        idRelacionDiametro:
+            diametro['idRelacion'],
+        idTipoMaterial:
+            material['idTipoMaterial'],
+        idExcavacion:
+            excavacion['idExcavacion'],
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      if (resultado.isNotEmpty) {
+        final precio = resultado[0]['precio'];
+
+        setState(() {
+          ejercicio.precioController.text =
+              '\$ ${precio ?? 0}';
+
+          ejercicio.textoDescripcion =
+              resultado[0]['descripcion'];
+        });
+      } else {
+        setState(() {
+          ejercicio.precioController.text =
+              '\$ 0.00';
+
+          ejercicio.textoDescripcion = null;
+        });
+      }
+    } catch (e) {
+      debugPrint(
+        'Error obteniendo precio del ejercicio '
+        '${ejercicio.id}: $e',
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!listaEjercicios.contains(ejercicio)) {
+        return;
+      }
+
+      setState(() {
+        ejercicio.precioController.text =
+            '\$ 0.00';
+      });
+    }
+  }
+
+  // ============================================================
+  // CALCULAR TOTAL DEL EJERCICIO
+  // ============================================================
+
+  void _calcularEjercicio(
+    EjercicioCalculo ejercicio,
+  ) {
+    // ==========================================================
+    // METROS
+    // ==========================================================
+
+    final metrosTexto =
+        ejercicio.metrosController.text
+            .replaceAll(',', '')
+            .trim();
+
+    // ==========================================================
+    // PRECIO POR METRO
+    // ==========================================================
+
+    final precioTexto =
+        ejercicio.precioController.text
+            .replaceAll('\$', '')
+            .replaceAll(',', '')
+            .trim();
+
+    // ==========================================================
+    // PENDIENTE
+    // ==========================================================
+
+    final pendienteTexto =
+        ejercicio.pendienteController.text
+            .replaceAll('%', '')
+            .replaceAll(',', '')
+            .trim();
+
+    final double cantidadMetros =
+        double.tryParse(metrosTexto) ?? 0.0;
+
+    final double precioPorMetro =
+        double.tryParse(precioTexto) ?? 0.0;
+
+    final double porcentajePendiente =
+        double.tryParse(pendienteTexto) ?? 0.0;
+
+    // ==========================================================
+    // SUBTOTAL
+    // ==========================================================
+
+    final double subtotal =
+        cantidadMetros * precioPorMetro;
+
+    // ==========================================================
+    // IMPORTE DE PENDIENTE
+    // ==========================================================
+
+    double importePendiente = 0.0;
+
+    if (
+        ejercicio.lineaTrabajoSeleccionada == 4 &&
+        porcentajePendiente > 0) {
+
+      importePendiente =
+          subtotal *
+          (porcentajePendiente / 100);
+    }
+
+    // ==========================================================
+    // TOTAL SIN IVA
+    // ==========================================================
+
+    final double resultadoTotal =
+        subtotal + importePendiente;
+
+    setState(() {
+      ejercicio.totalController.text =
+          '\$ ${resultadoTotal.toStringAsFixed(2)}';
+    });
+  }
+
+  // ============================================================
+  // CALCULAR GRAN TOTAL
+  // ============================================================
+
+  double _obtenerGranTotal() {
+    double granTotal = 0.0;
+
+    for (final ejercicio in listaEjercicios) {
+      final totalTexto = ejercicio.totalController.text
+          .replaceAll('\$', '')
+          .replaceAll(',', '')
+          .trim();
+
+      final total = double.tryParse(totalTexto) ?? 0.0;
+
+      granTotal += total;
+    }
+
+    return granTotal;
+  }
+  
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F9), // Fondo gris azulado muy claro
+      backgroundColor: const Color(0xFFF4F7F9),
+
+      // ========================================================
+      // APP BAR
+      // ========================================================
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 0, 
-        
-        // Mantenemos tu efecto de desenfoque Glassmorphism
+        scrolledUnderElevation: 0,
+
         flexibleSpace: ClipRRect(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 30),
+            filter: ImageFilter.blur(
+              sigmaX: 10,
+              sigmaY: 30,
+            ),
             child: Container(
-              color: primaryBlue, 
+              color: primaryBlue,
             ),
           ),
         ),
-        
-        // 🚀 CAMBIADO: Reemplazamos el CircleAvatar con ícono por tu imagen
+
         leading: Padding(
-          padding: const EdgeInsets.all(10.0), // Margen para que no pegue a los bordes
+          padding: const EdgeInsets.all(10.0),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(100), // Recorte circular perfecto
+            borderRadius:
+                BorderRadius.circular(100),
+
             child: Image.asset(
-              'assets/favicon.png', // Tu imagen o logo para el AppBar
-              fit: BoxFit.cover, // Hace que llene el círculo limpiamente
+              'assets/favicon.png',
+              fit: BoxFit.cover,
             ),
           ),
         ),
-        
+
         title: Text(
           'Costos Paramétricos',
           style: baseTextStyle.copyWith(
-            fontWeight: FontWeight.w600, 
-            fontSize: 18, 
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
             color: Colors.white,
           ),
         ),
       ),
+
+      // ========================================================
+      // BODY
+      // ========================================================
+
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header blanco debajo del AppBar
+
+            // ==================================================
+            // HEADER
+            // ==================================================
+
             Container(
               width: double.infinity,
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              padding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 20,
+              ),
+
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+
+                  // ==================================================
+                  // TÍTULO
+                  // ==================================================
+
                   Text(
                     'Cálculo de Construcción',
+                    textAlign: TextAlign.left,
                     style: baseTextStyle.copyWith(
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: primaryBlue,
                     ),
                   ),
+
                   const SizedBox(height: 4),
+
+                  // ==================================================
+                  // DESCRIPCIÓN
+                  // ==================================================
+
                   Text(
-                    'Determinación de costos por metro lineal mediante parámetros técnicos.',
-                    style: baseTextStyle.copyWith(color: Colors.black54, fontSize: 13),
+                    'Determinación de costos por metro '
+                    'lineal mediante parámetros técnicos.',
+                    textAlign: TextAlign.left,
+                    style: baseTextStyle.copyWith(
+                      color: Colors.black54,
+                      fontSize: 13,
+                    ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // CARD 1: Línea y Material
-                  _buildSectionCard([
-                    _buildDropdown(
-                      label: 'LÍNEA DE TRABAJO',
-                      currentValue: lineaTrabajoSeleccionada,
-                      items: opcionesLineaTrabajo, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) {
-                        setState(() {
-                          lineaTrabajoSeleccionada = nuevoId;
-                          objetoCompletoLineaTrabajo = null;
-                          textoIncluye = null;
-                          tipoObraSeleccionada = null;
-                          tipoTuberiaSeleccionada = null; 
-                          diametroTuberiaSeleccionado = null;
-                          objetoCompletoTipoTuberia = null;
-                        });
-                        
-                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
-                        objetoCompletoLineaTrabajo = obtenerObjetoLineaSeleccionada();
-                        textoIncluye = objetoCompletoLineaTrabajo?['incluye'];
 
-                        cargarTipoDeObra(objetoCompletoLineaTrabajo?['idClaveTrabajo']);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildDropdown(
-                      label: 'TIPO DE MATERIAL',
-                      currentValue: tipoMaterialSeleccionado,
-                      items: opcionesTipoMaterial, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) async {
-                        setState(() {
-                          tipoMaterialSeleccionado = nuevoId;
-                        });
-                        
-                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
-                        objetoCompletoTipoMaterial = obtenerObjetoTipoMaterialSeleccionado();
-                        // Cargamos la foto automaticamente
-                        await evaluarYCargarPrecio();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildDropdown(
-                      label: 'TIPO DE OBRA',
-                      currentValue: tipoObraSeleccionada,
-                      items: opcionesTipoObra, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) async {
-                        setState(() {
-                          tipoObraSeleccionada = nuevoId;
-                          tipoTuberiaSeleccionada = null; 
-                          diametroTuberiaSeleccionado = null;
-                          objetoCompletoTipoTuberia = null;
-                          objetoCompletoDiametroTuberia = null;
-                        });
-                        
-                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
-                        objetoCompletoTipoObra = obtenerObjetoTipoObraSeleccionada();
-                        await cargarTipoTuberia(objetoCompletoLineaTrabajo?['idLineaTrabajo'], objetoCompletoTipoObra?['idTipoObra'] );
-                        if (tipoTuberiaSeleccionada != null) {
-                          objetoCompletoTipoTuberia = obtenerObjetoTipoTuberiaSeleccionada();
-                          await cargarDiametroTuberia(objetoCompletoTipoTuberia?['idRelacion']);
-                          if (diametroTuberiaSeleccionado != null) {
-                            objetoCompletoDiametroTuberia = obtenerObjetoDiametroTuberiaSeleccionado();
-                            await evaluarYCargarPrecio();
-                          }
-                        }
-                      },
-                    ),
-                  ]),
-                  
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
-                  // CARD 2: Obra, Tubería y Metros
-                  _buildSectionCard([
-                    _buildDropdown(
-                      label: 'TIPO DE TUBERÍA',
-                      currentValue: tipoTuberiaSeleccionada,
-                      items: opcionesTipoTuberia, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) async {
-                        setState(() {
-                          tipoTuberiaSeleccionada = nuevoId;
-                          diametroTuberiaSeleccionado = null;
-                          objetoCompletoTipoTuberia = null;
-                          objetoCompletoDiametroTuberia = null;
-                        });
-                        
-                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
-                        objetoCompletoTipoTuberia = obtenerObjetoTipoTuberiaSeleccionada();
-                        await cargarDiametroTuberia(objetoCompletoTipoTuberia?['idRelacion']);
-                        if (diametroTuberiaSeleccionado != null) {
-                          objetoCompletoDiametroTuberia = obtenerObjetoDiametroTuberiaSeleccionado();
-                          await evaluarYCargarPrecio();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildDropdown(
-                      label: 'DIÁMETRO DE TUBERÍA',
-                      currentValue: diametroTuberiaSeleccionado,
-                      items: opcionesDiametrosTuberia, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) async {
-                        setState(() {
-                          diametroTuberiaSeleccionado = nuevoId;
-                          objetoCompletoDiametroTuberia = null;
-                        });
+                  // ==================================================
+                  // BOTÓN AGREGAR EJERCICIO
+                  // ==================================================
 
-                        objetoCompletoDiametroTuberia = obtenerObjetoDiametroTuberiaSeleccionado();
-                        await evaluarYCargarPrecio();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildDropdown(
-                      label: 'EXCAVACIÓ EN',
-                      currentValue: tipoExcavacionSeleccionada,
-                      items: opcionesTipoExcavacion, // Tu lista poblada desde la API
-                      baseStyle: baseTextStyle,
-                      onChanged: (int? nuevoId) async {
-                        setState(() {
-                          tipoExcavacionSeleccionada = nuevoId;
-                          objetoCompletoTipoExcavacion = null;
-                        });
-                        
-                        // Opcional: Aquí ya tienes acceso al objeto completo que se guardó en segundo plano
-                        objetoCompletoTipoExcavacion = obtenerObjetoTipoExcavacionSeleccionada();
-                        await evaluarYCargarPrecio();
-                      },
-                    ),
-                  ]),
-
-                  const SizedBox(height: 12),
-
-                  // CARD 3: Especificación Técnica (CON IMAGEN LOCAL)
-                  _buildSpecCard(baseTextStyle, textoIncluye, textoDescripcion),
-
-                  const SizedBox(height: 12),
-
-                  // CARD 4: Resultados
-                  _buildResultCard(primaryBlue, baseTextStyle),
-
-                  const SizedBox(height: 20),
-
-                  // BOTÓN BUSCAR / CALCULAR
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
+                  Center(
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.calculate_outlined),
-                      label: Text('Calcular Precios', style: baseTextStyle.copyWith(fontWeight: FontWeight.w600)),
+                      onPressed: _agregarNuevoEjercicio,
+
+                      icon: const Icon(
+                        Icons.add,
+                        size: 18,
+                      ),
+
+                      label: const Text(
+                        'Agregar Ejercicio',
+                      ),
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      onPressed: () {
-                        // 1. Extraemos y limpiamos el texto de los metros (quitando espacios o texto si lo hay)
-                        final String metrosTexto = metrosController.text.trim();
-                        
-                        // 2. Extraemos el texto del precio eliminando el signo '$' y las comas de formato para poder parsearlo
-                        final String precioTexto = precioController.text
-                            .replaceAll('\$', '')
-                            .replaceAll(',', '')
-                            .trim();
-
-                        // 3. Intentamos convertir a números reales (double). Si no son válidos, por defecto usamos 0.0
-                        final double cantidadMetros = double.tryParse(metrosTexto) ?? 0.0;
-                        final double precioPorMetro = double.tryParse(precioTexto) ?? 0.0;
-
-                        // 4. Realizamos la operación matemática
-                        final double resultadoTotal = cantidadMetros * precioPorMetro;
-
-                        // 5. Actualizamos el estado y formateamos el resultado con dos decimales y comas
-                        setState(() {
-                          // Opción A: Si usas un controlador para pintar el total en un TextField:
-                          totalController.text = '\$ ${resultadoTotal.toStringAsFixed(2)}';
-                          
-                          // Opción B: Si usas una variable String simple para pintarla en un Text():
-                          // cadenaTotal = '\$ ${resultadoTotal.toStringAsFixed(2)}';
-                        });
-                      },
                     ),
                   ),
-                  const SizedBox(height: 80),
                 ],
               ),
             ),
+
+            // ==================================================
+            // LISTA DE EJERCICIOS
+            // ==================================================
+
+            Padding(
+              padding:
+                  const EdgeInsets.all(16.0),
+
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics:
+                    const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount:
+                    listaEjercicios.length,
+
+                itemBuilder:
+                    (context, index) {
+                  final ejercicio =
+                      listaEjercicios[index];
+
+                  return _buildEjercicioCard(
+                    ejercicio,
+                    index,
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // ==================================================
+            // GRAN TOTAL
+            // ==================================================
+
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+
+              child: _buildGranTotalCard(
+                color: primaryBlue,
+                baseStyle: baseTextStyle,
+              ),
+            ),
+
+            const SizedBox(height: 120),
+
           ],
         ),
       ),
     );
   }
 
-  // Widget para Dropdowns personalizados
+  // ============================================================
+  // CARD DE EJERCICIO
+  // ============================================================
+
+  Widget _buildEjercicioCard(
+    EjercicioCalculo ejercicio,
+    int index,
+  ) {
+    return Card(
+      margin:
+          const EdgeInsets.only(bottom: 16),
+
+      elevation: 2,
+
+      shape:
+          RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(12),
+      ),
+
+      clipBehavior:
+          Clip.antiAlias,
+
+      child: ExpansionTile(
+        key: ValueKey(
+          'ejercicio_${ejercicio.id}',
+        ),
+
+        initiallyExpanded:
+            ejercicio.isExpanded,
+
+        shape: const Border(), 
+        collapsedShape: const Border(),
+
+        onExpansionChanged:
+            (expanded) {
+          ejercicio.isExpanded =
+              expanded;
+        },
+
+        collapsedBackgroundColor:
+            Colors.white,
+
+        backgroundColor:
+            Colors.grey[50],
+
+        title: Text(
+          'Ejercicio #${index + 1}',
+          style:
+              baseTextStyle.copyWith(
+            fontWeight:
+                FontWeight.bold,
+            fontSize: 16,
+            color: primaryBlue,
+          ),
+        ),
+
+        trailing: Row(
+          mainAxisSize:
+              MainAxisSize.min,
+
+          children: [
+
+            if (listaEjercicios.length > 1)
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color:
+                      Colors.redAccent,
+                ),
+
+                tooltip:
+                    'Eliminar ejercicio',
+
+                onPressed:
+                    () => _eliminarEjercicio(
+                  index,
+                ),
+              ),
+
+            const Icon(
+              Icons.expand_more,
+            ),
+          ],
+        ),
+
+        children: [
+
+          Padding(
+            padding:
+                const EdgeInsets.all(
+              16.0,
+            ),
+
+            child: Column(
+              children: [
+
+                // ============================================
+                // CARD 1
+                // LÍNEA Y MATERIAL
+                // ============================================
+
+                _buildSectionCard(
+                  [
+
+                    // LÍNEA DE TRABAJO
+                    _buildDropdown(
+                      label:
+                          'LÍNEA DE TRABAJO',
+
+                      currentValue:
+                          ejercicio
+                              .lineaTrabajoSeleccionada,
+
+                      items:
+                          ejercicio
+                              .opcionesLineaTrabajo,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .lineaTrabajoSeleccionada =
+                              nuevoId;
+
+                          ejercicio
+                                  .objetoCompletoLineaTrabajo =
+                              _obtenerLineaSeleccionada(
+                            ejercicio,
+                          );
+
+                          ejercicio.textoIncluye =
+                              ejercicio
+                                  .objetoCompletoLineaTrabajo?[
+                                      'incluye'];
+
+                          // Limpiar dependencias
+                          ejercicio
+                                  .tipoObraSeleccionada =
+                              null;
+
+                          ejercicio
+                                  .tipoTuberiaSeleccionada =
+                              null;
+
+                          ejercicio
+                                  .diametroTuberiaSeleccionado =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoTipoObra =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoTipoTuberia =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoDiametroTuberia =
+                              null;
+
+                          ejercicio
+                              .opcionesTipoObra = [];
+
+                          ejercicio
+                              .opcionesTipoTuberia = [];
+
+                          ejercicio
+                              .opcionesDiametrosTuberia =
+                              [];
+
+                          ejercicio.pendienteController.text = '0';
+                        });
+
+                        final idClaveTrabajo =
+                            ejercicio
+                                .objetoCompletoLineaTrabajo?[
+                                'idClaveTrabajo'];
+
+                        if (idClaveTrabajo ==
+                            null) {
+                          return;
+                        }
+
+                        await _cargarTipoObra(
+                          ejercicio,
+                          idClaveTrabajo,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(
+                      height: 16,
+                    ),
+
+                    // TIPO DE MATERIAL
+                    _buildDropdown(
+                      label:
+                          'TIPO DE MATERIAL',
+
+                      currentValue:
+                          ejercicio
+                              .tipoMaterialSeleccionado,
+
+                      items:
+                          ejercicio
+                              .opcionesTipoMaterial,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .tipoMaterialSeleccionado =
+                              nuevoId;
+
+                          ejercicio
+                                  .objetoCompletoTipoMaterial =
+                              _obtenerMaterialSeleccionado(
+                            ejercicio,
+                          );
+                        });
+
+                        await _evaluarYCargarPrecio(
+                          ejercicio,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(
+                      height: 16,
+                    ),
+
+                    // TIPO DE OBRA
+                    _buildDropdown(
+                      label:
+                          'TIPO DE OBRA',
+
+                      currentValue:
+                          ejercicio
+                              .tipoObraSeleccionada,
+
+                      items:
+                          ejercicio
+                              .opcionesTipoObra,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .tipoObraSeleccionada =
+                              nuevoId;
+
+                          ejercicio
+                                  .objetoCompletoTipoObra =
+                              _obtenerTipoObraSeleccionado(
+                            ejercicio,
+                          );
+
+                          ejercicio
+                                  .tipoTuberiaSeleccionada =
+                              null;
+
+                          ejercicio
+                                  .diametroTuberiaSeleccionado =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoTipoTuberia =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoDiametroTuberia =
+                              null;
+
+                          ejercicio
+                              .opcionesTipoTuberia = [];
+
+                          ejercicio
+                              .opcionesDiametrosTuberia =
+                              [];
+                        });
+
+                        final idLineaTrabajo =
+                            ejercicio
+                                .objetoCompletoLineaTrabajo?[
+                                'idLineaTrabajo'];
+
+                        final idTipoObra =
+                            ejercicio
+                                .objetoCompletoTipoObra?[
+                                'idTipoObra'];
+
+                        if (idLineaTrabajo ==
+                                null ||
+                            idTipoObra == null) {
+                          return;
+                        }
+
+                        await _cargarTipoTuberia(
+                          ejercicio,
+                          idLineaTrabajo,
+                          idTipoObra,
+                        );
+
+                        if (ejercicio
+                                .tipoTuberiaSeleccionada !=
+                            null) {
+                          ejercicio
+                                  .objetoCompletoTipoTuberia =
+                              _obtenerTipoTuberiaSeleccionado(
+                            ejercicio,
+                          );
+
+                          final idRelacion =
+                              ejercicio
+                                  .objetoCompletoTipoTuberia?[
+                                  'idRelacion'];
+
+                          if (idRelacion ==
+                              null) {
+                            return;
+                          }
+
+                          await _cargarDiametros(
+                            ejercicio,
+                            idRelacion,
+                          );
+
+                          if (ejercicio
+                                  .diametroTuberiaSeleccionado !=
+                              null) {
+                            ejercicio
+                                    .objetoCompletoDiametroTuberia =
+                                _obtenerDiametroSeleccionado(
+                              ejercicio,
+                            );
+
+                            await _evaluarYCargarPrecio(
+                              ejercicio,
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(
+                  height: 12,
+                ),
+
+                // ============================================
+                // CARD 2
+                // TUBERÍA, DIÁMETRO Y EXCAVACIÓN
+                // ============================================
+
+                _buildSectionCard(
+                  [
+
+                    // TIPO DE TUBERÍA
+                    _buildDropdown(
+                      label:
+                          'TIPO DE TUBERÍA',
+
+                      currentValue:
+                          ejercicio
+                              .tipoTuberiaSeleccionada,
+
+                      items:
+                          ejercicio
+                              .opcionesTipoTuberia,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .tipoTuberiaSeleccionada =
+                              nuevoId;
+
+                          ejercicio
+                                  .diametroTuberiaSeleccionado =
+                              null;
+
+                          ejercicio
+                                  .objetoCompletoTipoTuberia =
+                              _obtenerTipoTuberiaSeleccionado(
+                            ejercicio,
+                          );
+
+                          ejercicio
+                                  .objetoCompletoDiametroTuberia =
+                              null;
+
+                          ejercicio
+                              .opcionesDiametrosTuberia =
+                              [];
+                        });
+
+                        final idRelacion =
+                            ejercicio
+                                .objetoCompletoTipoTuberia?[
+                                'idRelacion'];
+
+                        if (idRelacion == null) {
+                          return;
+                        }
+
+                        await _cargarDiametros(
+                          ejercicio,
+                          idRelacion,
+                        );
+
+                        if (ejercicio
+                                .diametroTuberiaSeleccionado !=
+                            null) {
+                          ejercicio
+                                  .objetoCompletoDiametroTuberia =
+                              _obtenerDiametroSeleccionado(
+                            ejercicio,
+                          );
+
+                          await _evaluarYCargarPrecio(
+                            ejercicio,
+                          );
+                        }
+                      },
+                    ),
+
+                    const SizedBox(
+                      height: 16,
+                    ),
+
+                    // DIÁMETRO
+                    _buildDropdown(
+                      label:
+                          'DIÁMETRO DE TUBERÍA',
+
+                      currentValue:
+                          ejercicio
+                              .diametroTuberiaSeleccionado,
+
+                      items:
+                          ejercicio
+                              .opcionesDiametrosTuberia,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .diametroTuberiaSeleccionado =
+                              nuevoId;
+
+                          ejercicio
+                                  .objetoCompletoDiametroTuberia =
+                              _obtenerDiametroSeleccionado(
+                            ejercicio,
+                          );
+                        });
+
+                        await _evaluarYCargarPrecio(
+                          ejercicio,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(
+                      height: 16,
+                    ),
+
+                    // EXCAVACIÓN
+                    _buildDropdown(
+                      label:
+                          'EXCAVACIÓN EN',
+
+                      currentValue:
+                          ejercicio
+                              .tipoExcavacionSeleccionada,
+
+                      items:
+                          ejercicio
+                              .opcionesTipoExcavacion,
+
+                      baseStyle:
+                          baseTextStyle,
+
+                      onChanged:
+                          (int? nuevoId) async {
+                        if (nuevoId == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          ejercicio
+                                  .tipoExcavacionSeleccionada =
+                              nuevoId;
+
+                          ejercicio
+                                  .objetoCompletoTipoExcavacion =
+                              _obtenerExcavacionSeleccionada(
+                            ejercicio,
+                          );
+                        });
+
+                        await _evaluarYCargarPrecio(
+                          ejercicio,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(
+                  height: 12,
+                ),
+
+                // ============================================
+                // CARD 3
+                // ESPECIFICACIÓN TÉCNICA
+                // ============================================
+
+                _buildSpecCard(
+                  baseStyle: baseTextStyle,
+                  incluyeTexto:
+                      ejercicio.textoIncluye,
+                  descripcionTexto:
+                      ejercicio.textoDescripcion,
+                  imagen:
+                      ejercicio
+                          .objetoCompletoTipoMaterial?[
+                          'imagen'],
+                ),
+
+                const SizedBox(
+                  height: 12,
+                ),
+
+                // ============================================
+                // CARD 4
+                // RESULTADOS
+                // ============================================
+
+                _buildResultCard(
+                  color: primaryBlue,
+                  baseStyle:
+                      baseTextStyle,
+
+                  metrosController:
+                      ejercicio
+                          .metrosController,
+
+                  precioController:
+                      ejercicio
+                          .precioController,
+
+                  pendienteController: 
+                      ejercicio
+                        .pendienteController,
+
+                  totalController:
+                      ejercicio
+                          .totalController,
+
+                  mostrarPendiente: 
+                      ejercicio
+                        .lineaTrabajoSeleccionada == 4,
+                ),
+
+                const SizedBox(
+                  height: 20,
+                ),
+
+                // ============================================
+                // BOTÓN CALCULAR
+                // ============================================
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+
+                  child:
+                      ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.calculate_outlined,
+                    ),
+
+                    label: Text(
+                      'Calcular Precios',
+                      style:
+                          baseTextStyle.copyWith(
+                        fontWeight:
+                            FontWeight.w600,
+                      ),
+                    ),
+
+                    style:
+                        ElevatedButton.styleFrom(
+                      backgroundColor:
+                          primaryBlue,
+                      foregroundColor:
+                          Colors.white,
+
+                      shape:
+                          RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                    ),
+
+                    onPressed: () =>
+                        _calcularEjercicio(
+                      ejercicio,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // DROPDOWN
+  // ============================================================
+
   Widget _buildDropdown({
     required String label,
     required int? currentValue,
@@ -568,34 +1545,102 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
     required ValueChanged<int?> onChanged,
     required TextStyle baseStyle,
   }) {
+    // Si el valor seleccionado ya no existe
+    // dentro de las opciones, evitamos que Flutter
+    // lance el error de DropdownButton.
+    final bool valorValido =
+        currentValue == null ||
+        items.any(
+          (item) => item.value == currentValue,
+        );
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
+
       children: [
-        // Etiqueta superior (LÍNEA DE TRABAJO, etc.)
+
         Text(
-          label, 
-          style: baseStyle.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black87),
-        ),
-        const SizedBox(height: 8),
-        
-        // Contenedor con el diseño gris estético
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12), // Reducimos el vertical porque el Dropdown añade su propio padding
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(8),
+          label,
+          style:
+              baseStyle.copyWith(
+            fontSize: 11,
+            fontWeight:
+                FontWeight.w600,
+            color: Colors.black87,
           ),
-          child: DropdownButtonHideUnderline( // Oculta la línea horizontal por defecto de Flutter
-            child: DropdownButton<int>(
-              value: currentValue,
+        ),
+
+        const SizedBox(
+          height: 8,
+        ),
+
+        Container(
+          padding:
+              const EdgeInsets.symmetric(
+            horizontal: 12,
+          ),
+
+          decoration:
+              BoxDecoration(
+            color:
+                const Color(0xFFF5F5F5),
+
+            borderRadius:
+                BorderRadius.circular(
+              8,
+            ),
+          ),
+
+          child:
+              DropdownButtonHideUnderline(
+            child:
+                DropdownButton<int>(
+              value:
+                  valorValido
+                      ? currentValue
+                      : null,
+
               items: items,
-              onChanged: onChanged,
-              isExpanded: true, // Hace que ocupe todo el ancho disponible del contenedor
-              icon: const Icon(Icons.unfold_more, color: Colors.blueGrey, size: 20), // Tu ícono personalizado de la UI
-              style: baseStyle.copyWith(fontSize: 14, color: Colors.black87),
-              hint: Text("Seleccione una opción", style: baseStyle.copyWith(color: Colors.black38)),
-              dropdownColor: Colors.white, // Color del menú flotante al abrirse
-              borderRadius: BorderRadius.circular(8), // Bordes redondeados también para el menú flotante
+
+              onChanged:
+                  onChanged,
+
+              isExpanded:
+                  true,
+
+              icon:
+                  const Icon(
+                Icons.unfold_more,
+                color:
+                    Colors.blueGrey,
+                size: 20,
+              ),
+
+              style:
+                  baseStyle.copyWith(
+                fontSize: 14,
+                color:
+                    Colors.black87,
+              ),
+
+              hint:
+                  Text(
+                'Seleccione una opción',
+                style:
+                    baseStyle.copyWith(
+                  color:
+                      Colors.black38,
+                ),
+              ),
+
+              dropdownColor:
+                  Colors.white,
+
+              borderRadius:
+                  BorderRadius.circular(
+                8,
+              ),
             ),
           ),
         ),
@@ -603,158 +1648,308 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
     );
   }
 
-  // Tarjeta contenedora blanca
-  Widget _buildSectionCard(List<Widget> children) {
+  // ============================================================
+  // SECTION CARD
+  // ============================================================
+
+  Widget _buildSectionCard(
+    List<Widget> children,
+  ) {
     return Card(
       elevation: 0.5,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(children: children),
+
+      color:
+          Colors.white,
+
+      shape:
+          RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+      ),
+
+      child:
+          Padding(
+        padding:
+            const EdgeInsets.all(
+          16.0,
+        ),
+
+        child:
+            Column(
+          children:
+              children,
+        ),
       ),
     );
   }
 
-  // Tarjeta de Especificación Técnica (ACTUALIZADA CON ASSET)
-  Widget _buildSpecCard(
-    TextStyle baseStyle,
-    String? incluyeTexto, // Puede ser nulo mientras carga la API
-    String? descripcionTexto,
-  ) {
+  // ============================================================
+  // ESPECIFICACIÓN TÉCNICA
+  // ============================================================
+
+  Widget _buildSpecCard({
+    required TextStyle baseStyle,
+    required String? incluyeTexto,
+    required String? descripcionTexto,
+    required dynamic imagen,
+  }) {
+    final String? nombreImagen =
+        imagen?.toString();
+
+    final bool tieneImagen =
+        nombreImagen != null &&
+        nombreImagen.trim().isNotEmpty;
+
+    final String urlImagen =
+        tieneImagen
+            ? 'http://187.188.214.154/'
+              'ParametricosApi/imagenes/'
+              '$nombreImagen'
+            : '';
+
     return Card(
-      color: Colors.white,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
+      color:
+          Colors.white,
+
+      clipBehavior:
+          Clip.antiAlias,
+
+      shape:
+          RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+      ),
+
+      child:
+          Column(
         children: [
+
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            color: const Color(0xFFEEEEEE),
-            child: Text(
+            width:
+                double.infinity,
+
+            padding:
+                const EdgeInsets.all(
+              10,
+            ),
+
+            color:
+                const Color(0xFFEEEEEE),
+
+            child:
+                Text(
               'ESPECIFICACIÓN TÉCNICA',
-              textAlign: TextAlign.center,
-              style: baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue[900]),
+
+              textAlign:
+                  TextAlign.center,
+
+              style:
+                  baseStyle.copyWith(
+                fontSize: 12,
+                fontWeight:
+                    FontWeight.bold,
+                color:
+                    Colors.blue[900],
+              ),
             ),
           ),
+
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+            padding:
+                const EdgeInsets.all(
+              16.0,
+            ),
+
+            child:
+                Column(
               children: [
+
+                // ==========================================
+                // IMAGEN
+                // ==========================================
+
                 Stack(
-                  alignment: Alignment.bottomRight,
+                  alignment:
+                      Alignment.bottomRight,
+
                   children: [
-                    // CAMBIO: Ahora carga desde la carpeta local assets
+
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        //'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
-                        'http://187.188.214.154/ParametricosApi/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
-                        height: 230,
-                        fit: BoxFit.contain,
-                        // Manejo de error por si el archivo no se encuentra o está mal escrito
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 150,
-                            width: double.infinity,
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
-                          );
-                        },
+                      borderRadius:
+                          BorderRadius.circular(
+                        8,
                       ),
+
+                      child:
+                          tieneImagen
+                              ? Image.network(
+                                  urlImagen,
+
+                                  height:
+                                      230,
+
+                                  width:
+                                      double.infinity,
+
+                                  fit:
+                                      BoxFit.contain,
+
+                                  errorBuilder:
+                                      (
+                                    context,
+                                    error,
+                                    stackTrace,
+                                  ) {
+                                    return _buildImageError();
+                                  },
+                                )
+                              : _buildImageError(),
                     ),
-                    Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9), 
-                        border: Border.all(color: Colors.grey[300]!), 
-                        borderRadius: BorderRadius.circular(8),
+
+                    if (tieneImagen)
+                      Container(
+                        margin:
+                            const EdgeInsets.all(
+                          8,
+                        ),
+
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              Colors.white.withOpacity(
+                            0.9,
+                          ),
+
+                          border:
+                              Border.all(
+                            color:
+                                Colors.grey[300]!,
+                          ),
+
+                          borderRadius:
+                              BorderRadius.circular(
+                            8,
+                          ),
+                        ),
+
+                        child:
+                            IconButton(
+                          icon:
+                              const Icon(
+                            Icons.zoom_in,
+                            color:
+                                Colors.black87,
+                          ),
+
+                          onPressed: () {
+                            _mostrarImagen(
+                              urlImagen,
+                            );
+                          },
+                        ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.zoom_in, color: Colors.black87),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => Dialog(
-                              backgroundColor: Colors.transparent, // Fondo del diálogo invisible
-                              insetPadding: const EdgeInsets.all(10), // Margen mínimo con los bordes de la pantalla
-                              child: Stack(
-                                alignment: Alignment.topRight,
-                                children: [
-                                  // Contenedor principal de la imagen con zoom integrado
-                                  Container(
-                                    width: double.infinity,
-                                    height: MediaQuery.of(context).size.height * 0.7, // Ocupa el 70% del alto de la pantalla
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: InteractiveViewer(
-                                        panEnabled: true, // Permite arrastrar la imagen cuando tiene zoom
-                                        minScale: 0.5,    // Escala mínima (alejar)
-                                        maxScale: 4.0,    // Escala máxima (acercar)
-                                        child: Image.network(
-                                          //'https://shakeable-unlabeled-na.ngrok-free.dev/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
-                                          'http://187.188.214.154/ParametricosApi/imagenes/${objetoCompletoTipoMaterial?['imagen']}', 
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  
-                                  // Botón flotante para cerrar el modal cómodamente X
-                                  Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.black54,
-                                      child: IconButton(
-                                        icon: const Icon(Icons.close, color: Colors.white),
-                                        onPressed: () => Navigator.of(context).pop(), // Cierra el modal
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
                   ],
                 ),
-                const SizedBox(height: 12),
+
+                const SizedBox(
+                  height: 12,
+                ),
+
+                // ==========================================
+                // INCLUYE
+                // ==========================================
+
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
                   children: [
+
                     Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: baseStyle.copyWith(color: Colors.black87, fontSize: 13),
+                      child:
+                          RichText(
+                        text:
+                            TextSpan(
+                          style:
+                              baseStyle.copyWith(
+                            color:
+                                Colors.black87,
+                            fontSize:
+                                13,
+                          ),
+
                           children: [
-                            const TextSpan(text: 'Incluye: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                            // Si es nulo, muestra un mensaje sutil de carga o espacio vacío
-                            TextSpan(text: incluyeTexto ?? 'No disponible por el momento.'),
+
+                            const TextSpan(
+                              text:
+                                  'Incluye: ',
+                              style:
+                                  TextStyle(
+                                fontWeight:
+                                    FontWeight.bold,
+                              ),
+                            ),
+
+                            TextSpan(
+                              text:
+                                  incluyeTexto ??
+                                      'No disponible por el momento.',
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+
+                const SizedBox(
+                  height: 12,
+                ),
+
+                // ==========================================
+                // DESCRIPCIÓN
+                // ==========================================
+
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
                   children: [
+
                     Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: baseStyle.copyWith(color: Colors.black87, fontSize: 13),
+                      child:
+                          RichText(
+                        text:
+                            TextSpan(
+                          style:
+                              baseStyle.copyWith(
+                            color:
+                                Colors.black87,
+                            fontSize:
+                                13,
+                          ),
+
                           children: [
-                            const TextSpan(text: 'Descripción: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                            // Si es nulo, muestra un mensaje sutil de carga o espacio vacío
-                            TextSpan(text: descripcionTexto ?? 'No disponible por el momento.'),
+
+                            const TextSpan(
+                              text:
+                                  'Descripción: ',
+                              style:
+                                  TextStyle(
+                                fontWeight:
+                                    FontWeight.bold,
+                              ),
+                            ),
+
+                            TextSpan(
+                              text:
+                                  descripcionTexto ??
+                                      'No disponible por el momento.',
+                            ),
                           ],
                         ),
                       ),
@@ -769,115 +1964,564 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
     );
   }
 
-  // Tarjeta de Resultados
-  Widget _buildResultCard(Color color, TextStyle baseStyle) {
+  // ============================================================
+  // IMAGEN NO DISPONIBLE
+  // ============================================================
+
+  Widget _buildImageError() {
     return Container(
-      decoration: BoxDecoration(
-        color:  Color(0xFF003D71).withOpacity(0.03),
-        borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: color, width: 6)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
+      height: 150,
+      width: double.infinity,
+      color: Colors.grey[200],
+      alignment: Alignment.center,
+
+      child: const Icon(
+        Icons.broken_image,
+        color: Colors.grey,
+        size: 40,
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    );
+  }
+
+  // ============================================================
+  // MOSTRAR IMAGEN EN MODAL
+  // ============================================================
+
+  void _mostrarImagen(
+    String urlImagen,
+  ) {
+    showDialog(
+      context: context,
+
+      builder: (context) {
+        return Dialog(
+          backgroundColor:
+              Colors.transparent,
+
+          insetPadding:
+              const EdgeInsets.all(
+            10,
+          ),
+
+          child:
+              Stack(
+            alignment:
+                Alignment.topRight,
+
+            children: [
+
+              Container(
+                width:
+                    double.infinity,
+
+                height:
+                    MediaQuery.of(
+                  context,
+                ).size.height *
+                    0.7,
+
+                decoration:
+                    BoxDecoration(
+                  color:
+                      Colors.white,
+
+                  borderRadius:
+                      BorderRadius.circular(
+                    12,
+                  ),
+                ),
+
+                child:
+                    ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(
+                    12,
+                  ),
+
+                  child:
+                      InteractiveViewer(
+                    panEnabled:
+                        true,
+
+                    minScale:
+                        0.5,
+
+                    maxScale:
+                        4.0,
+
+                    child:
+                        Image.network(
+                      urlImagen,
+
+                      fit:
+                          BoxFit.contain,
+
+                      errorBuilder:
+                          (
+                        context,
+                        error,
+                        stackTrace,
+                      ) {
+                        return _buildImageError();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding:
+                    const EdgeInsets.all(
+                  12.0,
+                ),
+
+                child:
+                    CircleAvatar(
+                  backgroundColor:
+                      Colors.black54,
+
+                  child:
+                      IconButton(
+                    icon:
+                        const Icon(
+                      Icons.close,
+                      color:
+                          Colors.white,
+                    ),
+
+                    onPressed:
+                        () =>
+                            Navigator.of(
+                          context,
+                        ).pop(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // CARD DE RESULTADOS
+  // ============================================================
+
+  Widget _buildResultCard({
+    required Color color,
+    required TextStyle baseStyle,
+    required TextEditingController metrosController,
+    required TextEditingController precioController,
+    required TextEditingController pendienteController,
+    required TextEditingController totalController,
+    required bool mostrarPendiente,
+  }) {
+    return Container(
+      decoration:
+          BoxDecoration(
+        color:
+            const Color(0xFF003D71)
+                .withOpacity(
+          0.03,
+        ),
+
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+
+        border:
+            Border(
+          left:
+              BorderSide(
+            color:
+                color,
+            width:
+                6,
+          ),
+        ),
+
+        boxShadow: [
+          BoxShadow(
+            color:
+                Colors.black.withOpacity(
+              0.05,
+            ),
+
+            blurRadius:
+                4,
+          ),
+        ],
+      ),
+
+      padding:
+          const EdgeInsets.all(
+        16,
+      ),
+
+      child:
+          Column(
         children: [
+
+          // ==================================================
+          // METROS
+          // ==================================================
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+
             children: [
-              Text('METRO A CONSTRUIR', style: baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
+
+              Text(
+                'METROS A CONSTRUIR',
+
+                style:
+                    baseStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight:
+                      FontWeight.w500,
+                ),
+              ),
+
               SizedBox(
-                width: 140, // Ancho ideal para una cifra numérica con su sufijo
-                height: 39, // Altura compacta para que encaje perfectamente en la fila
-                child: TextField(
-                  controller: metrosController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true), // Abre teclado numérico con punto
-                  textAlign: TextAlign.end, // Alinea el texto a la derecha junto al sufijo
-                  style: baseStyle.copyWith(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-                  decoration: InputDecoration(
-                    fillColor: const Color.fromARGB(0, 245, 245, 245), // El mismo fondo gris de tus dropdowns
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    isDense: true, // Reduce el padding interno por defecto de Flutter
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6), 
-                      borderSide: BorderSide.none, // Sin bordes negros toscos
+                width: 140,
+                height: 40,
+
+                child:
+                    TextField(
+                  controller:
+                      metrosController,
+
+                  keyboardType:
+                      const TextInputType.numberWithOptions(
+                    decimal:
+                        true,
+                  ),
+
+                  textAlign:
+                      TextAlign.end,
+
+                  style:
+                      baseStyle.copyWith(
+                    fontSize: 18,
+                    fontWeight:
+                        FontWeight.bold,
+                    color:
+                        Colors.black87,
+                  ),
+
+                  decoration:
+                      InputDecoration(
+                    fillColor:
+                        const Color(
+                      0xFFF5F5F5,
                     ),
-                    suffixText: ' MTS',
-                    suffixStyle: baseStyle.copyWith(
-                      fontSize: 14, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.black54,
+
+                    filled:
+                        true,
+
+                    isDense:
+                        false,
+
+                    contentPadding:
+                        const EdgeInsets
+                            .symmetric(
+                      horizontal:
+                          10,
+                      vertical:
+                          8,
+                    ),
+
+                    border:
+                        OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(
+                        6,
+                      ),
+
+                      borderSide:
+                          BorderSide.none,
+                    ),
+
+                    suffixText:
+                        ' MTS',
+
+                    suffixStyle:
+                        baseStyle.copyWith(
+                      fontSize:
+                          13,
+                      fontWeight:
+                          FontWeight.bold,
+                      color:
+                          Colors.black54,
                     ),
                   ),
-                  onChanged: (value) {
-                    // Aquí capturas lo que el usuario escriba para tus cálculos en tiempo real
-                    //print("Metros ingresados: $value");
-                  },
                 ),
               ),
             ],
           ),
+
+          const SizedBox(
+            height: 8,
+          ),
+
+          // ==================================================
+          // PRECIO
+          // ==================================================
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+
             children: [
-              Text('PRECIO POR METRO', style: baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
-              //Text('\$ 666.65', style: baseStyle.copyWith(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+
+              Text(
+                'PRECIO POR METRO',
+
+                style:
+                    baseStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight:
+                      FontWeight.w500,
+                ),
+              ),
+
               Expanded(
-                child: Container(
-                  height: 39,
-                  alignment: Alignment.centerRight,
-                  child: TextField(
-                    controller: precioController,
-                    keyboardType: TextInputType.text,
-                    textAlign: TextAlign.end, 
-                    style: baseStyle.copyWith(
-                      fontSize: 20, 
-                      fontWeight: FontWeight.bold, 
-                      color: const Color(0xFF003D71), // Color azul de la marca para el precio
+                child:
+                    Container(
+                  height: 40,
+
+                  alignment:
+                      Alignment.centerRight,
+
+                  child:
+                      TextField(
+                    controller:
+                        precioController,
+
+                    keyboardType:
+                        const TextInputType.numberWithOptions(
+                      decimal:
+                          true,
                     ),
-                    decoration: InputDecoration(
-                      fillColor: Colors.transparent, // Fondo transparente para que limpie la UI
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      isDense: true, 
-                      border: InputBorder.none,
+
+                    textAlign:
+                        TextAlign.end,
+
+                    style:
+                        baseStyle.copyWith(
+                      fontSize: 18,
+                      fontWeight:
+                          FontWeight.bold,
+                      color:
+                          primaryBlue,
                     ),
-                    onChanged: (value) {
-                      //print("Precio ingresado: $value");
-                    },
+
+                    decoration:
+                        const InputDecoration(
+                      fillColor:
+                          Colors.transparent,
+
+                      filled:
+                          true,
+
+                      isCollapsed:
+                          true,
+
+                      contentPadding:
+                          EdgeInsets.symmetric(
+                        horizontal:
+                            10,
+                        vertical:
+                            10,
+                      ),
+
+                      border:
+                          InputBorder.none,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const Divider(height: 24, color: Color(0xFF003D71),),
+
+          // ==================================================
+          // PENDIENTE
+          // ==================================================
+
+          if (mostrarPendiente) ...[
+            const SizedBox(
+              height: 8,
+            ),
+
+            Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+
+              children: [
+
+                Text(
+                  'PENDIENTE',
+
+                  style:
+                      baseStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight:
+                        FontWeight.w500,
+                  ),
+                ),
+
+                SizedBox(
+                  width: 140,
+                  height: 40,
+
+                  child:
+                      TextField(
+                    controller:
+                        pendienteController,
+
+                    keyboardType:
+                        const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+
+                    textAlign:
+                        TextAlign.end,
+
+                    style:
+                        baseStyle.copyWith(
+                      fontSize: 18,
+                      fontWeight:
+                          FontWeight.bold,
+                      color:
+                          primaryBlue,
+                    ),
+
+                    decoration:
+                        InputDecoration(
+                      fillColor:
+                          const Color(0xFFF5F5F5),
+
+                      filled:
+                          true,
+
+                      contentPadding:
+                          const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          6,
+                        ),
+
+                        borderSide:
+                            BorderSide.none,
+                      ),
+
+                      suffixText:
+                          ' %',
+
+                      suffixStyle:
+                          baseStyle.copyWith(
+                        fontSize: 13,
+                        fontWeight:
+                            FontWeight.bold,
+                        color:
+                            Colors.black54,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const Divider(
+            height: 24,
+            color:
+                Color(0xFF003D71),
+          ),
+
+          // ==================================================
+          // TOTAL
+          // ==================================================
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+
             children: [
-              Text('TOTAL SIN IVA', style: baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
+
+              Text(
+                'TOTAL SIN IVA',
+
+                style:
+                    baseStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight:
+                      FontWeight.w500,
+                ),
+              ),
+
               Expanded(
-                child: Container(
-                  height: 39,
-                  alignment: Alignment.centerRight,
-                  child: TextField(
-                    controller: totalController,
-                    keyboardType: TextInputType.text,
-                    textAlign: TextAlign.end, 
-                    style: baseStyle.copyWith(
-                      fontSize: 20, 
-                      fontWeight: FontWeight.bold, 
-                      color: const Color.fromARGB(255, 0, 0, 0), // Color azul de la marca para el precio
+                child:
+                    Container(
+                  height: 40,
+
+                  alignment:
+                      Alignment.centerRight,
+
+                  child:
+                      TextField(
+                    controller:
+                        totalController,
+
+                    readOnly:
+                        true,
+
+                    keyboardType:
+                        TextInputType.text,
+
+                    textAlign:
+                        TextAlign.end,
+
+                    style:
+                        baseStyle.copyWith(
+                      fontSize: 18,
+                      fontWeight:
+                          FontWeight.bold,
+                      color:
+                          Colors.black,
                     ),
-                    decoration: InputDecoration(
-                      fillColor: Colors.transparent, // Fondo transparente para que limpie la UI
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      isDense: true, 
-                      border: InputBorder.none,
+
+                    decoration:
+                        const InputDecoration(
+                      fillColor:
+                          Colors.transparent,
+
+                      filled:
+                          true,
+
+                      isCollapsed:
+                          true,
+
+                      contentPadding:
+                          EdgeInsets.symmetric(
+                        horizontal:
+                            10,
+                        vertical:
+                            10,
+                      ),
+
+                      border:
+                          InputBorder.none,
                     ),
-                    onChanged: (value) {
-                      //print("Total calculado: $value");
-                    },
                   ),
                 ),
               ),
@@ -888,4 +2532,265 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
     );
   }
 
+  // ============================================================
+  // CARD DE GRAN TOTAL
+  // ============================================================
+
+  Widget _buildGranTotalCard({
+    required Color color,
+    required TextStyle baseStyle,
+  }) {
+    final double granTotal = _obtenerGranTotal();
+
+    return Container(
+      width: double.infinity,
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(12),
+
+        border: Border(
+          left: BorderSide(
+            color: color,
+            width: 6,
+          ),
+        ),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+
+      padding: const EdgeInsets.all(18),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+
+          Text(
+            'RESUMEN GENERAL',
+            style: baseStyle.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            children: [
+
+              Text(
+                'EJERCICIOS',
+                style: baseStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+
+              Text(
+                '${listaEjercicios.length}',
+                style: baseStyle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            children: [
+
+              Text(
+                'GRAN TOTAL SIN IVA',
+                style: baseStyle.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+
+              Text(
+                '\$ ${granTotal.toStringAsFixed(2)}',
+                style: baseStyle.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+// ============================================================================
+// MODELO DE EJERCICIO
+// ============================================================================
+
+class EjercicioCalculo {
+  final int id;
+
+  bool isExpanded;
+
+  // ========================================================================
+  // ESPECIFICACIÓN
+  // ========================================================================
+
+  String? textoIncluye;
+
+  String? textoDescripcion;
+
+  // ========================================================================
+  // LÍNEA DE TRABAJO
+  // ========================================================================
+
+  List<dynamic> lineasTrabajo = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesLineaTrabajo = [];
+
+  int? lineaTrabajoSeleccionada;
+
+  Map<String, dynamic>?
+      objetoCompletoLineaTrabajo;
+
+  // ========================================================================
+  // TIPO DE MATERIAL
+  // ========================================================================
+
+  List<dynamic> tiposMaterial = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesTipoMaterial = [];
+
+  int? tipoMaterialSeleccionado;
+
+  Map<String, dynamic>?
+      objetoCompletoTipoMaterial;
+
+  // ========================================================================
+  // TIPO DE OBRA
+  // ========================================================================
+
+  List<dynamic> tiposObra = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesTipoObra = [];
+
+  int? tipoObraSeleccionada;
+
+  Map<String, dynamic>?
+      objetoCompletoTipoObra;
+
+  // ========================================================================
+  // TIPO DE TUBERÍA
+  // ========================================================================
+
+  List<dynamic> tiposTuberia = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesTipoTuberia = [];
+
+  int? tipoTuberiaSeleccionada;
+
+  Map<String, dynamic>?
+      objetoCompletoTipoTuberia;
+
+  // ========================================================================
+  // DIÁMETRO
+  // ========================================================================
+
+  List<dynamic> diametrosTuberia = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesDiametrosTuberia = [];
+
+  int? diametroTuberiaSeleccionado;
+
+  Map<String, dynamic>?
+      objetoCompletoDiametroTuberia;
+
+  // ========================================================================
+  // EXCAVACIÓN
+  // ========================================================================
+
+  List<dynamic> tiposExcavacion = [];
+
+  List<DropdownMenuItem<int>>
+      opcionesTipoExcavacion = [];
+
+  int? tipoExcavacionSeleccionada;
+
+  Map<String, dynamic>?
+      objetoCompletoTipoExcavacion;
+
+  // ========================================================================
+  // RELACIÓN DE PRECIO
+  // ========================================================================
+
+  List<dynamic> relacionPrecio = [];
+
+  // ========================================================================
+  // CONTROLADORES
+  // ========================================================================
+
+  final TextEditingController metrosController =
+      TextEditingController(
+    text: '0',
+  );
+
+  final TextEditingController precioController =
+      TextEditingController(
+    text: '\$ 0.00',
+  );
+
+  // PORCENTAJE DE PENDIENTE 
+  final TextEditingController pendienteController = 
+      TextEditingController( 
+    text: '0', 
+  );
+
+  final TextEditingController totalController =
+      TextEditingController(
+    text: '\$ 0.00',
+  );
+
+  // ========================================================================
+  // CONSTRUCTOR
+  // ========================================================================
+
+  EjercicioCalculo({
+    required this.id,
+    this.isExpanded = true,
+  });
+
+  // ========================================================================
+  // DISPOSE
+  // ========================================================================
+
+  void dispose() {
+    metrosController.dispose();
+    precioController.dispose();
+    pendienteController.dispose();
+    totalController.dispose();
+  }
 }
