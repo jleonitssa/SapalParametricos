@@ -57,12 +57,41 @@ const routes = [
         component: () => import("src/pages/CatalogosClaveTrabajo.vue"),
       },
       {
+        path: "Diametro",
+        component: () => import("src/pages/CatalogosDiametro.vue"),
+      },
+      {
+        path: "Excavacion",
+        component: () => import("src/pages/CatalogosExcavacion.vue"),
+      },
+      {
         path: "LineaTrabajo",
         component: () => import("src/pages/CatalogosLineaTrabajo.vue"),
       },
       {
+        path: "RelacionObraDiametro",
+        component: () => import("src/pages/CatalogosRelacionObraDiametro.vue"),
+      },
+      {
+        path: "RelacionLineaObraTuberia",
+        component: () =>
+          import("src/pages/CatalogosRelacionLineaObraTuberia.vue"),
+      },
+      {
+        path: "RelacionFinalPrecio",
+        component: () => import("src/pages/CatalogosRelacionFinalPrecio.vue"),
+      },
+      {
+        path: "TipoMaterial",
+        component: () => import("src/pages/CatalogosTipoMaterial.vue"),
+      },
+      {
         path: "TipoObra",
         component: () => import("src/pages/CatalogosTipoObra.vue"),
+      },
+      {
+        path: "Tuberia",
+        component: () => import("src/pages/CatalogosTuberia.vue"),
       },
     ],
   },

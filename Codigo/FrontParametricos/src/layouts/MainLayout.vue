@@ -87,6 +87,24 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable @click="abrirCatalogos(5)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Diámetro</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(6)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Excavación</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable @click="abrirCatalogos(2)">
             <q-item-section avatar>
               <q-icon name="library_books" />
@@ -96,12 +114,57 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable @click="abrirCatalogos(7)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Relación Línea/Obra/Tubería</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(9)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Relación Obra/Precio</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(8)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Relación Obra/Tubería/Diámetro</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(10)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Tipo de Material</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable @click="abrirCatalogos(3)">
             <q-item-section avatar>
               <q-icon name="library_books" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Tipo de Obra</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable @click="abrirCatalogos(4)">
+            <q-item-section avatar>
+              <q-icon name="library_books" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Tubería</q-item-label>
             </q-item-section>
           </q-item>
         </q-expansion-item>
@@ -197,6 +260,27 @@ function abrirCatalogos(Tipo) {
       break;
     case 3:
       window.location = ruta.value + "/#/Catalogos/TipoObra";
+      break;
+    case 4:
+      window.location = ruta.value + "/#/Catalogos/Tuberia";
+      break;
+    case 5:
+      window.location = ruta.value + "/#/Catalogos/Diametro";
+      break;
+    case 6:
+      window.location = ruta.value + "/#/Catalogos/Excavacion";
+      break;
+    case 7:
+      window.location = ruta.value + "/#/Catalogos/RelacionLineaObraTuberia";
+      break;
+    case 8:
+      window.location = ruta.value + "/#/Catalogos/RelacionObraDiametro";
+      break;
+    case 9:
+      window.location = ruta.value + "/#/Catalogos/RelacionFinalPrecio";
+      break;
+    case 10:
+      window.location = ruta.value + "/#/Catalogos/TipoMaterial";
       break;
   }
 }

@@ -32,13 +32,24 @@ BEGIN
 												CASE WHEN @SortColumn = 'IDTipoObra' AND @SortDir = 'DESC' THEN IDTipoObra END DESC,
 												CASE WHEN @SortColumn = 'Tuberia' AND @SortDir = 'ASC' THEN Tuberia END ASC,
 												CASE WHEN @SortColumn = 'Tuberia' AND @SortDir = 'DESC' THEN Tuberia END DESC,
+												CASE WHEN @SortColumn = 'TipoObra' AND @SortDir = 'ASC' THEN TipoObra END ASC,
+												CASE WHEN @SortColumn = 'TipoObra' AND @SortDir = 'DESC' THEN TipoObra END DESC,
+												CASE WHEN @SortColumn = 'LineaTrabajo' AND @SortDir = 'ASC' THEN LineaTrabajo END ASC,
+												CASE WHEN @SortColumn = 'LineaTrabajo' AND @SortDir = 'DESC' THEN LineaTrabajo END DESC,
+												CASE WHEN @SortColumn = 'NombreCompleto' AND @SortDir = 'ASC' THEN NombreCompleto END ASC,
+												CASE WHEN @SortColumn = 'NombreCompleto' AND @SortDir = 'DESC' THEN NombreCompleto END DESC,
 												CASE WHEN @SortColumn IS NULL OR @SortDir IS NULL THEN IDRelacion END ASC) AS ROWID 
 	 	FROM	
 		(
 			SELECT	rlo.*,
-					tu.Nombre AS Tuberia
+					tu.Nombre AS Tuberia,
+					tpo.Nombre AS TipoObra,
+					lt.Nombre AS LineaTrabajo,
+					(lt.Nombre + ' | ' + tpo.Nombre + ' | ' + tu.Nombre) AS NombreCompleto
 			FROM	dbo.RelacionLineaObraTuberia rlo
 			JOIN	dbo.Tuberia tu ON tu.IDTuberia = rlo.IDTuberia
+			JOIN	dbo.TipoObra tpo ON tpo.IDTipoObra = rlo.IDTipoObra
+			JOIN	dbo.LineaTrabajo lt ON lt.IDLineaTrabajo = rlo.IDLineaTrabajo
 	 		WHERE	(ISNULL(@IDRelacion, 0) = 0 OR rlo.IDRelacion = @IDRelacion) AND 
 					(ISNULL(@IDLineaTrabajo, 0) = 0 OR rlo.IDLineaTrabajo = @IDLineaTrabajo) AND 
 					(ISNULL(@IDTipoObra, 0) = 0 OR rlo.IDTipoObra = @IDTipoObra) AND 

@@ -51,6 +51,12 @@ namespace DatosParametricos.Entidades
         public int IDRelacionDiametro { get; set; }
         public int IDTipoMaterial { get; set; }
         public int IDExcavacion { get; set; }
+        public string TipoMaterial { get; set; }
+        public string Excavacion { get; set; }
+        public string Diametro { get; set; }
+        public string Tuberia { get; set; }
+        public string TipoObra { get; set; }
+        public string LineaTrabajo { get; set; }
         public Decimal Precio { get; set; }
         public string Descripcion { get; set; }
     }
@@ -65,6 +71,9 @@ namespace DatosParametricos.Entidades
         public int IDTipoObra { get; set; }
         public int IDTuberia { get; set; }
         public string Tuberia { get; set; }
+        public string TipoObra { get; set; }
+        public string LineaTrabajo { get; set; }
+        public string NombreCompleto { get; set; }
     }
     #endregion
 
@@ -76,6 +85,10 @@ namespace DatosParametricos.Entidades
         public int IDRelacionObra { get; set; }
         public int IDDiametro { get; set; }
         public string Diametro { get; set; }
+        public string Tuberia { get; set; }
+        public string TipoObra { get; set; }
+        public string LineaTrabajo { get; set; }
+        public string NombreCompleto { get; set; }
     }
     #endregion
 

@@ -28,14 +28,30 @@ BEGIN
 												CASE WHEN @SortColumn = 'IDRelacion' AND @SortDir = 'DESC' THEN IDRelacion END DESC,
 												CASE WHEN @SortColumn = 'IDRelacionDiametro' AND @SortDir = 'ASC' THEN IDRelacionDiametro END ASC,
 												CASE WHEN @SortColumn = 'IDRelacionDiametro' AND @SortDir = 'DESC' THEN IDRelacionDiametro END DESC,
-												CASE WHEN @SortColumn = 'IDTipoMaterial' AND @SortDir = 'ASC' THEN IDTipoMaterial END ASC,
-												CASE WHEN @SortColumn = 'IDTipoMaterial' AND @SortDir = 'DESC' THEN IDTipoMaterial END DESC,
-												CASE WHEN @SortColumn = 'IDExcavacion' AND @SortDir = 'ASC' THEN IDExcavacion END ASC,
-												CASE WHEN @SortColumn = 'IDExcavacion' AND @SortDir = 'DESC' THEN IDExcavacion END DESC,
+												CASE WHEN @SortColumn = 'TipoMaterial' AND @SortDir = 'ASC' THEN TipoMaterial END ASC,
+												CASE WHEN @SortColumn = 'TipoMaterial' AND @SortDir = 'DESC' THEN TipoMaterial END DESC,
+												CASE WHEN @SortColumn = 'Excavacion' AND @SortDir = 'ASC' THEN Excavacion END ASC,
+												CASE WHEN @SortColumn = 'Excavacion' AND @SortDir = 'DESC' THEN Excavacion END DESC,
+												CASE WHEN @SortColumn = 'Diametro' AND @SortDir = 'ASC' THEN Diametro END ASC,
+												CASE WHEN @SortColumn = 'Diametro' AND @SortDir = 'DESC' THEN Diametro END DESC,
+												CASE WHEN @SortColumn = 'Tuberia' AND @SortDir = 'ASC' THEN Tuberia END ASC,
+												CASE WHEN @SortColumn = 'Tuberia' AND @SortDir = 'DESC' THEN Tuberia END DESC,
+												CASE WHEN @SortColumn = 'TipoObra' AND @SortDir = 'ASC' THEN TipoObra END ASC,
+												CASE WHEN @SortColumn = 'TipoObra' AND @SortDir = 'DESC' THEN TipoObra END DESC,
+												CASE WHEN @SortColumn = 'LineaTrabajo' AND @SortDir = 'ASC' THEN LineaTrabajo END ASC,
+												CASE WHEN @SortColumn = 'LineaTrabajo' AND @SortDir = 'DESC' THEN LineaTrabajo END DESC,
+												--CASE WHEN @SortColumn = 'NombreCompleto' AND @SortDir = 'ASC' THEN NombreCompleto END ASC,
+												--CASE WHEN @SortColumn = 'NombreCompleto' AND @SortDir = 'DESC' THEN NombreCompleto END DESC,
 												CASE WHEN @SortColumn IS NULL OR @SortDir IS NULL THEN IDRelacion END ASC) AS ROWID 
 	 	FROM	
 		(	
 			SELECT	rfp.*,
+					di.Nombre AS Diametro,					
+					tu.Nombre AS Tuberia,
+					tb.Nombre AS TipoObra,
+					lt.Nombre AS LineaTrabajo,
+					tm.Nombre AS TipoMaterial,
+					ex.Nombre AS Excavacion,
 					('TUBERIA DE ' +
 					 tb.Nombre + ' DE ' +
 					 lt.Nombre + ' ' +
@@ -53,7 +69,7 @@ BEGIN
 			JOIN	dbo.TipoMaterial tm ON tm.IDTipoMaterial = rfp.IDTipoMaterial
 			JOIN	dbo.Excavacion ex ON ex.IDExcavacion = rfp.IDExcavacion
 	 		WHERE	(ISNULL(@IDRelacion, 0) = 0 OR rfp.IDRelacion = @IDRelacion) AND 
-    				(ISNULL(@IDRelacionDiametro, 0) = 0 OR IDRelacionDiametro = @IDRelacionDiametro) AND 
+    				(ISNULL(@IDRelacionDiametro, 0) = 0 OR rfp.IDRelacionDiametro = @IDRelacionDiametro) AND 
     				(ISNULL(@IDTipoMaterial, 0) = 0 OR rfp.IDTipoMaterial = @IDTipoMaterial) AND 
     				(ISNULL(@IDExcavacion, 0) = 0 OR rfp.IDExcavacion = @IDExcavacion)
 		)t1
