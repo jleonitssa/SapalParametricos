@@ -11,7 +11,10 @@ GO
 -- ================================================
 	
 CREATE PROCEDURE [dbo].[procTipoMaterialInsert]
-	@Nombre VARCHAR(100)
+	@Nombre VARCHAR(100),
+	@Descripcion1 VARCHAR(350),
+	@Descripcion2 VARCHAR(350),
+	@Descripcion3 VARCHAR(350)
 AS
 BEGIN
 	DECLARE @Ret INT
@@ -24,9 +27,15 @@ BEGIN
 	BEGIN
 		INSERT INTO	dbo.TipoMaterial
 				(Nombre,
-				 Imagen)
+				 Imagen,
+				 Descripcion1,
+				 Descripcion2,
+				 Descripcion3)
 		VALUES	(@Nombre,
-				 'SinImagen.jpg')
+				 'SinImagen.jpg',
+				 @Descripcion1,
+				 @Descripcion2,
+				 @Descripcion3)
 	
 		SET @Ret = @@IDENTITY
 	END

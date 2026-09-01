@@ -21,7 +21,7 @@ namespace APIParametricos.Controllers.Catalogos
         [Route("ActualizarParametricos")]
         public IActionResult ActualizarParametricos(IFormFile file)
         {
-            string archivoSubido = new UploadHandler().Upload(file);
+            string archivoSubido = new UploadHandler().Upload(file, TipoArchivo.Documento);
 
             RespuestaActualizacion Res = new RespuestaActualizacion() { errores = new List<MensajeError>() };
 

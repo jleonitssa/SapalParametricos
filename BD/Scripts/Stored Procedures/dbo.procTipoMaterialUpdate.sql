@@ -12,7 +12,10 @@ GO
 	
 CREATE PROCEDURE [dbo].[procTipoMaterialUpdate]
 	@IDTipoMaterial INT,
-	@Nombre VARCHAR(100)
+	@Nombre VARCHAR(100),
+	@Descripcion1 VARCHAR(350),
+	@Descripcion2 VARCHAR(350),
+	@Descripcion3 VARCHAR(350)
 AS
 BEGIN
 	DECLARE @Ret INT = @IDTipoMaterial
@@ -24,7 +27,10 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE	dbo.TipoMaterial
-		SET		Nombre = @Nombre
+		SET		Nombre = @Nombre,
+				Descripcion1 = @Descripcion1,
+				Descripcion2 = @Descripcion2,
+				Descripcion3 = @Descripcion3
 		WHERE	IDTipoMaterial = @IDTipoMaterial
 	END
 	

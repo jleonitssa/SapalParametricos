@@ -89,7 +89,7 @@ namespace APIParametricos.Controllers.Catalogos
 
             try
             {
-                int res = DatosParametricos.Operaciones.OperacionesTipoMaterial.TipoMaterialInsert(sol.Nombre, context);
+                int res = DatosParametricos.Operaciones.OperacionesTipoMaterial.TipoMaterialInsert(sol.Nombre, sol.Descripcion1, sol.Descripcion2, sol.Descripcion3, context);
 
                 Resp = new Respuesta
                 {
@@ -155,7 +155,39 @@ namespace APIParametricos.Controllers.Catalogos
 
             try
             {
-                int res = DatosParametricos.Operaciones.OperacionesTipoMaterial.TipoMaterialUpdate(sol.IDTipoMaterial, sol.Nombre, context);
+                int res = DatosParametricos.Operaciones.OperacionesTipoMaterial.TipoMaterialUpdate(sol.IDTipoMaterial, sol.Nombre, sol.Descripcion1, sol.Descripcion2, sol.Descripcion3, context);
+
+                Resp = new Respuesta
+                {
+                    Codigo = 1,
+                    Resultado = res,
+                    Mensaje = "",
+                    Descripcion = ""
+                };
+            }
+            catch (Exception ex)
+            {
+                Resp = new Respuesta
+                {
+                    Codigo = -1,
+                    Resultado = -1,
+                    Mensaje = ex.Message,
+                    Descripcion = ex.StackTrace
+                };
+            }
+
+            return Resp;
+        }
+
+        [HttpPost]
+        [Route("TipoMaterialUpdateImagen")]
+        public Respuesta TipoMaterialUpdateImagen(reqTipoMaterialUpdateImagen sol)
+        {
+            Respuesta Resp;
+
+            try
+            {
+                int res = DatosParametricos.Operaciones.OperacionesTipoMaterial.TipoMaterialUpdateImagen(sol.IDTipoMaterial, sol.Imagen, context);
 
                 Resp = new Respuesta
                 {

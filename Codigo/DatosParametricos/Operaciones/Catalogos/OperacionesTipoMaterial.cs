@@ -22,10 +22,10 @@ namespace DatosParametricos.Operaciones
             return (int)ret.Value;
         }
 
-        public static int TipoMaterialInsert(string Nombre, ApplicationDbContext context)
+        public static int TipoMaterialInsert(string Nombre, string Descripcion1, string Descripcion2, string Descripcion3, ApplicationDbContext context)
         {
             var ret = new SqlParameter { ParameterName = "Ret", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
-            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procTipoMaterialInsert @Nombre='{Nombre}'", ret);
+            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procTipoMaterialInsert @Nombre='{Nombre}', @Descripcion1='{Descripcion1}', @Descripcion2='{Descripcion2}', @Descripcion3='{Descripcion3}'", ret);
 
             return (int)ret.Value;
         }
@@ -37,10 +37,18 @@ namespace DatosParametricos.Operaciones
             return respuesta;
         }
 
-        public static int TipoMaterialUpdate(int IDTipoMaterial, string Nombre, ApplicationDbContext context)
+        public static int TipoMaterialUpdate(int IDTipoMaterial, string Nombre, string Descripcion1, string Descripcion2, string Descripcion3, ApplicationDbContext context)
         {
             var ret = new SqlParameter { ParameterName = "Ret", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
-            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procTipoMaterialUpdate @IDTipoMaterial={IDTipoMaterial}, @Nombre='{Nombre}'", ret);
+            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procTipoMaterialUpdate @IDTipoMaterial={IDTipoMaterial}, @Nombre='{Nombre}', @Descripcion1='{Descripcion1}', @Descripcion2='{Descripcion2}', @Descripcion3='{Descripcion3}'", ret);
+
+            return (int)ret.Value;
+        }
+
+        public static int TipoMaterialUpdateImagen(int IDTipoMaterial, string Imagen, ApplicationDbContext context)
+        {
+            var ret = new SqlParameter { ParameterName = "Ret", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Output };
+            var respuesta = context.Database.ExecuteSqlRaw($"EXEC @Ret = dbo.procTipoMaterialUpdateImagen @IDTipoMaterial={IDTipoMaterial}, @Imagen='{Imagen}'", ret);
 
             return (int)ret.Value;
         }

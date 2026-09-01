@@ -14,6 +14,9 @@
     public class reqTipoMaterialInsert
     {
         public string Nombre { get; set; }
+        public string Descripcion1 { get; set; }
+        public string Descripcion2 { get; set; }
+        public string Descripcion3 { get; set; }
     }
 
     public class reqTipoMaterialSelect
@@ -30,5 +33,14 @@
     {
         public int IDTipoMaterial { get; set; }
         public string Nombre { get; set; }
+        public string Descripcion1 { get; set; }
+        public string Descripcion2 { get; set; }
+        public string Descripcion3 { get; set; }
+    }
+
+    public class reqTipoMaterialUpdateImagen
+    {
+        public int IDTipoMaterial { get; set; }
+        public string Imagen { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace APIParametricos.Controllers.Utilidades
         [Route("UploadFile")]
         public IActionResult UploadFile(IFormFile file)
         {
-            return Ok(new UploadHandler().Upload(file));
+            return Ok(new UploadHandler().Upload(file, TipoArchivo.Imagen));
         }
 
         [HttpGet("DownloadFile/{Archivo}")]
