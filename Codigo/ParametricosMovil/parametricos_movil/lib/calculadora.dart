@@ -1436,6 +1436,15 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                       ejercicio.textoIncluye,
                   descripcionTexto:
                       ejercicio.textoDescripcion,
+                  descripcion1: 
+                    ejercicio. 
+                      objetoCompletoTipoMaterial?['descripcion1'].toString(), 
+                  descripcion2: 
+                    ejercicio. 
+                      objetoCompletoTipoMaterial?['descripcion2'].toString(), 
+                  descripcion3:
+                    ejercicio. 
+                      objetoCompletoTipoMaterial?['descripcion3'].toString(),
                   imagen:
                       ejercicio
                           .objetoCompletoTipoMaterial?[
@@ -1693,6 +1702,9 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
     required TextStyle baseStyle,
     required String? incluyeTexto,
     required String? descripcionTexto,
+    required String? descripcion1, 
+    required String? descripcion2, 
+    required String? descripcion3,
     required dynamic imagen,
   }) {
     final String? nombreImagen =
@@ -1956,6 +1968,165 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                     ),
                   ],
                 ),
+
+                // ==========================================
+                // DESCRIPCIÓN 1
+                // ==========================================
+
+                if (descripcion1 != null &&
+                    descripcion1.trim().isNotEmpty) ...[
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+
+                    children: [
+
+                      Expanded(
+                        child:
+                            RichText(
+                          text:
+                              TextSpan(
+                            style:
+                                baseStyle.copyWith(
+                              color:
+                                  Colors.black87,
+                              fontSize:
+                                  13,
+                            ),
+
+                            children: [
+
+                              const TextSpan(
+                                text:
+                                    'Descripción 1: ',
+                                style:
+                                    TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+
+                              TextSpan(
+                                text:
+                                    descripcion1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                // ==========================================
+                // DESCRIPCIÓN 2
+                // ==========================================
+
+                if (descripcion2 != null &&
+                    descripcion2.trim().isNotEmpty) ...[
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+
+                    children: [
+
+                      Expanded(
+                        child:
+                            RichText(
+                          text:
+                              TextSpan(
+                            style:
+                                baseStyle.copyWith(
+                              color:
+                                  Colors.black87,
+                              fontSize:
+                                  13,
+                            ),
+
+                            children: [
+
+                              const TextSpan(
+                                text:
+                                    'Descripción 2: ',
+                                style:
+                                    TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+
+                              TextSpan(
+                                text:
+                                    descripcion2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                // ==========================================
+                // DESCRIPCIÓN 3
+                // ==========================================
+
+                if (descripcion3 != null &&
+                    descripcion3.trim().isNotEmpty) ...[
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+
+                    children: [
+
+                      Expanded(
+                        child:
+                            RichText(
+                          text:
+                              TextSpan(
+                            style:
+                                baseStyle.copyWith(
+                              color:
+                                  Colors.black87,
+                              fontSize:
+                                  13,
+                            ),
+
+                            children: [
+
+                              const TextSpan(
+                                text:
+                                    'Descripción 3: ',
+                                style:
+                                    TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+
+                              TextSpan(
+                                text:
+                                    descripcion3,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

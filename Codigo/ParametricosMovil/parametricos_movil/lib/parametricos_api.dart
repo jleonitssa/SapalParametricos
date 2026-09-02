@@ -37,7 +37,15 @@ class ParametricosApi {
   Future<List<dynamic>> obtenerExcavacion() async {
     try {
       final response = await _dio.post(
-        "/parametricos/ExcavacionSelect",
+        "/excavacion/ExcavacionSelect",
+        data: {
+          "idExcavacion": 0,
+          "nombre": "",
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idExcavacion",
+          "sortDir": "ASC"
+        }
       );
 
       final data = response.data;
@@ -56,7 +64,16 @@ class ParametricosApi {
   Future<List<dynamic>> obtenerLineaTrabajo() async {
     try {
       final response = await _dio.post(
-        "/parametricos/LineaTrabajoSelect",
+        "/lineatrabajo/LineaTrabajoSelect",
+        data: {
+          "idLineaTrabajo": 0,
+          "nombre": "",
+          "idClaveTrabajo": 0,
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idLineaTrabajo",
+          "sortDir": "ASC"
+        }
       );
 
       final data = response.data;
@@ -79,11 +96,16 @@ class ParametricosApi {
   }) async {
     try {
       final response = await _dio.post(
-        "/parametricos/RelacionFinalPrecioSelect",
+        "/relacionfinalprecio/RelacionFinalPrecioSelect",
         data: {
+          "idRelacion": 0,
           "idRelacionDiametro": idRelacionDiametro,
           "idTipoMaterial": idTipoMaterial,
           "idExcavacion": idExcavacion,
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idRelacion",
+          "sortDir": "ASC"
         },
       );
 
@@ -106,10 +128,16 @@ class ParametricosApi {
   }) async {
     try {
       final response = await _dio.post(
-        "/parametricos/RelacionLineaObraTuberiaSelect",
+        "/relacionlineaobratuberia/RelacionLineaObraTuberiaSelect",
         data: {
+          "idRelacion": 0,
           "idLineaTrabajo": idLineaTrabajo,
           "idTipoObra": idTipoObra,
+          "idTuberia": 0,
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idRelacion",
+          "sortDir": "ASC"
         },
       );
 
@@ -131,9 +159,15 @@ class ParametricosApi {
   }) async {
     try {
       final response = await _dio.post(
-        "/parametricos/RelacionObraDiametroSelect",
+        "/relacionobradiametro/RelacionObraDiametroSelect",
         data: {
+          "idRelacion": 0,
           "idRelacionObra": idRelacionObra,
+          "idDiametro": 0,
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idRelacion",
+          "sortDir": "ASC"
         },
       );
 
@@ -153,7 +187,15 @@ class ParametricosApi {
   Future<List<dynamic>> obtenerTipoMaterial() async {
     try {
       final response = await _dio.post(
-        "/parametricos/TipoMaterialSelect",
+        "/tipomaterial/TipoMaterialSelect",
+        data: {
+          "idTipoMaterial": 0,
+          "nombre": "",
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idTipoMaterial",
+          "sortDir": "ASC"
+        }
       );
 
       final data = response.data;
@@ -174,9 +216,15 @@ class ParametricosApi {
   }) async {
     try {
       final response = await _dio.post(
-        "/parametricos/TipoObraSelect",
+        "/tipoobra/TipoObraSelect",
         data: {
+          "idTipoObra": 0,
           "idClaveTrabajo": idClaveTrabajo,
+          "nombre": "",
+          "initRow": 1,
+          "endRow": 1000,
+          "sortColumn": "idTipoObra",
+          "sortDir": "ASC"
         },
       );
 
