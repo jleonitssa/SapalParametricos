@@ -97,9 +97,15 @@ function subirArchivo() {
 //Eventos
 onMounted(() => {});
 
-function onClickDescargar() {
+function onClickDescargarVacio() {
   window.open(
     urlImagenes.value + "/plantillas/LayoutParametros.xlsx",
+    "_blank"
+  );
+}
+function onClickDescargarLleno() {
+  window.open(
+    urlImagenes.value + "/parametricos/DescargarParametricos",
     "_blank"
   );
 }
@@ -158,11 +164,17 @@ function onClickDescargar() {
       <q-separator />
       <q-card-actions align="center">
         <q-btn
-          label="Descargar Layout"
+          label="Descargar Layout (Vacío)"
           color="primary"
           icon="dataset"
-          @click="onClickDescargar"
+          @click="onClickDescargarVacio"
           style="width: 250px"
+        />
+        <q-btn
+          label="Descargar Layout (Datos Actuales)"
+          color="primary"
+          icon="dataset"
+          @click="onClickDescargarLleno"
         />
         <q-btn
           icon="add"

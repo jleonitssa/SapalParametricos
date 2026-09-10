@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APIParametricos", "APIParam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatosParametricos", "..\DatosParametricos\DatosParametricos.csproj", "{E1E9B568-CC34-4F8B-B9CC-8E31EB834F04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilidadesParametricos", "..\UtilidadesParametricos\UtilidadesParametricos.csproj", "{89CEFFF5-29C0-EA61-84E8-55C628AAD535}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E1E9B568-CC34-4F8B-B9CC-8E31EB834F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1E9B568-CC34-4F8B-B9CC-8E31EB834F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1E9B568-CC34-4F8B-B9CC-8E31EB834F04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89CEFFF5-29C0-EA61-84E8-55C628AAD535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89CEFFF5-29C0-EA61-84E8-55C628AAD535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89CEFFF5-29C0-EA61-84E8-55C628AAD535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89CEFFF5-29C0-EA61-84E8-55C628AAD535}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

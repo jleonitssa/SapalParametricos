@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<style>
+			
+		</style>
+	</head>
+	<body>		
+		<table border="0" style="width: 100%;">
+			<tr>
+				<td style="width: 50px;" rowspan="4">
+					<img src="{{UrlServidor}}/plantillas/favicon.png" style="width:50px">
+				</td>
+				<td style="text-align: center; font-size: 15pt;">
+					Sistema de Agua Potable y Alcantarillado de Le&oacute;n
+					<br />&nbsp;
+				</td>
+				<td style="vertical-align: top;" rowspan="4">
+					{{Fecha}}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: center; font-size: 11pt; font-weight: bold;">
+					Costos y Evaluaci&oacute;n
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: center; font-size: 11pt; font-weight: bold;">
+					{{NombreProyecto}}
+					<br />&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: center; font-size: 11pt;">
+					Elabor&oacute;: {{Usuario}}
+				</td>
+			</tr>
+		</table>
+		<table style="width: 100%; border-top-width: 0.5px; border-bottom-width: 0.5px; border-top-style: solid; border-bottom-style: solid">
+			<td style="text-align: center; font-size: 12pt; font-weight: bold;">
+				PRESUPUESTO
+			</td>
+		</table>
+		<table border="0" style="width: 100%;">
+			<tr>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Clv. Usuario
+				</td>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Descripci&oacute;n
+				</td>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Unidad
+				</td>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Cantidad
+				</td>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Precio Unitario
+				</td>
+				<td style="font-size: 9.5pt; border-top-style: solid; border-top-width: 0.5px; border-bottom-style: solid; border-bottom-width: 0.5px; text-align: center;">
+					Total
+				</td>
+			</tr>
+			{{Ejercicios}}
+			<tr>
+				<td style="font-size: 9.5pt;" colspan="5">
+					<b>Subtotal de Presupuesto</b>
+				</td>
+				<td style="font-size: 9.5pt; text-align: right;">
+					<b>{{Subtotal}}</b>
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 9.5pt;" colspan="6">
+					<b>**&nbsp;{{SubtotalLetra}}&nbsp;**</b>
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 9.5pt;" colspan="6">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 9.5pt; text-align: right;" colspan="5">
+					<b>I.V.A. 16%&nbsp;&nbsp;&nbsp;</b>
+				</td>
+				<td style="font-size: 9.5pt; text-align: right;">
+					<b>{{IVA}}</b>
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 9.5pt; text-align: right;" colspan="5">
+					<b>TOTAL&nbsp;&nbsp;&nbsp;</b>
+				</td>
+				<td style="font-size: 9.5pt; text-align: right;">
+					<b>{{Total}}</b>
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 9.5pt;" colspan="6">
+					<b>**&nbsp;{{TotalLetra}}&nbsp;**</b>
+				</td>
+			</tr>
+		</table>		
+	</body>
+</html>		

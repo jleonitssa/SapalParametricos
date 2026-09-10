@@ -1,8 +1,10 @@
 using APIParametricos.Code;
 using APIParametricos.Dtos.Respuesta;
-using APIParametricos.Dtos.Solicitud.Catalogos;
+using ClosedXML.Excel;
 using DatosParametricos.Operaciones;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace APIParametricos.Controllers.Catalogos
 {
@@ -42,13 +44,13 @@ namespace APIParametricos.Controllers.Catalogos
                     {
                         bool hayError = false;
 
-                        string Linea = linea.Count > 1 ? (linea[1] ?? "") : "";
+                        string Linea = linea.Count > 0 ? (linea[0] ?? "") : "";
+                        string Material = linea.Count > 1 ? (linea[1] ?? "") : "";
                         string Obra = linea.Count > 2 ? (linea[2] ?? "") : "";
-                        string Material = linea.Count > 3 ? (linea[3] ?? "") : "";
-                        string Tuberia = linea.Count > 4 ? (linea[4] ?? "") : "";
-                        string Diametro = linea.Count > 5 ? (linea[5] ?? "") : "";
-                        string Excavacion = linea.Count > 6 ? (linea[6] ?? "") : "";
-                        string Precio = linea.Count > 7 ? (linea[7] ?? "") : "";
+                        string Tuberia = linea.Count > 3 ? (linea[3] ?? "") : "";
+                        string Diametro = linea.Count > 4 ? (linea[4] ?? "") : "";
+                        string Excavacion = linea.Count > 5 ? (linea[5] ?? "") : "";
+                        string Precio = linea.Count > 5 ? (linea[6] ?? "") : "";
 
                         decimal precio;
 
@@ -106,6 +108,53 @@ namespace APIParametricos.Controllers.Catalogos
             }
 
             return Ok(Res);
+        }
+
+        [HttpGet("DescargarParametricos")]
+        public IActionResult Get()
+        {
+            var ruta = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "Archivos",
+                "ParametricosActuales.xlsx"
+            );
+
+            List<DatosParametricos.Entidades.RelacionFinalPrecio> res = OperacionesRelacionFinalPrecio.RelacionFinalPrecioSelect(0, 0, 0, 0, 1, 100000, "", "", context);
+
+            if(System.IO.File.Exists(ruta))
+                System.IO.File.Delete(ruta);
+
+            using (var workbook = new XLWorkbook())
+            {
+                var ws = workbook.Worksheets.Add("Datos Parametros");
+                var fila = 2;
+
+                var rowData = new List<object[]> { new object[] { "Línea de Trabajo", "Tipo de Material", "Tipo de Obra", "Tipo de Tubería", "Diámetro de Tubería", "Excavación", "Precio por m" } };
+
+                ws.Cell("A1").InsertData(rowData);
+
+                foreach (var reg in res)
+                {
+                    rowData = new List<object[]> { new object[] { reg.LineaTrabajo, reg.TipoMaterial, reg.TipoObra, reg.Tuberia, reg.Diametro, reg.Excavacion, reg.Precio } };
+
+                    ws.Cell("A" + fila.ToString()).InsertData(rowData);
+
+                    fila++;
+                }
+
+                workbook.SaveAs(ruta);
+            }
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(ruta);
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType("ParametricosActuales.xlsx", out string mimeType))
+            {
+                mimeType = "application/octet-stream";
+            }
+
+            return File(fileBytes, mimeType);
         }
     }
 }

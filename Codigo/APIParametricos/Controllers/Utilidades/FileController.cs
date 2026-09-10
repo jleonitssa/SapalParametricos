@@ -46,5 +46,21 @@ namespace APIParametricos.Controllers.Utilidades
 
             return File(fileBytes, mimeType);
         }
+
+
+        [HttpGet("DescargarPresupuesto")]
+        public IActionResult Get([FromQuery]int IDUsuario, [FromQuery]string NombreProyecto, [FromQuery]string Presupuestos)
+        {
+            UtilidadesParametricos.ArchivoOrden archivo = UtilidadesParametricos.Funciones.ObtenerArchivoPdf(IDUsuario, NombreProyecto, Presupuestos, context, configuration["ValoresConfiguracion:UrlLocalServidor"]);
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(archivo.NombreArchivo, out string mimeType))
+            {
+                mimeType = "application/octet-stream";
+            }
+
+            return File(archivo.BytesArchivo, mimeType);
+        }
     }
 }

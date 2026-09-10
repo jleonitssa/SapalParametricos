@@ -2,21 +2,20 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { api } from "boot/axios";
 import { useQuasar } from "quasar";
+import { formatoMoneda } from "src/functions/funciones";
 
 const $q = useQuasar();
 
 const urlImagenes = ref($q.localStorage.getItem("urlImagenes"));
 
 const loading = ref(false);
+const mostrarImagen = ref(false);
+const mostrarDescargar = ref(false);
 
-//const calcularHabilitado = ref(true);
+const Titulo = ref("");
+const refTitulo = ref(null);
 
 let contadorEjercicios = 1;
-
-const formatterMXN = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-});
 
 interface LineaTrabajo {
   idLineaTrabajo: number;
@@ -96,7 +95,7 @@ const opcionesExcavacion = ref<Excavacion[]>([
   },
 ]);
 
-function calcularTotalEjercicio(ejercicio: any): number {
+function calcularTotalEjercicio(ejercicio: any, tipo: number): number {
   const metros = Number(ejercicio.metros) || 0;
 
   const precio = Number(ejercicio.precio.precio) || 0;
@@ -115,7 +114,10 @@ function calcularTotalEjercicio(ejercicio: any): number {
 
   let importePendiente = 0;
 
-  if (ejercicio.linea.idLineaTrabajo === 4) {
+  if (
+    ejercicio.linea.idLineaTrabajo == 4 ||
+    ejercicio.linea.idLineaTrabajo == 3
+  ) {
     importePendiente = subtotal * (pendiente / 100);
   }
 
@@ -123,7 +125,16 @@ function calcularTotalEjercicio(ejercicio: any): number {
   // TOTAL
   // ==========================================
 
-  return subtotal + importePendiente;
+  if (tipo == 1)
+    //Subtotal
+    return subtotal + importePendiente;
+  else {
+    if (tipo == 2)
+      //IVA
+      return (subtotal + importePendiente) * 0.16;
+    //Total
+    else return (subtotal + importePendiente) * 1.16;
+  }
 }
 
 function crearEjercicio() {
@@ -203,10 +214,6 @@ function crearEjercicio() {
 
 const ejercicios = ref([crearEjercicio()]);
 
-function formatoMXN(valor: number) {
-  return formatterMXN.format(valor || 0);
-}
-
 function calcularEjercicio(ejercicio: any) {
   const metros = Number(ejercicio.metros) || 0;
 
@@ -222,12 +229,15 @@ function calcularEjercicio(ejercicio: any) {
 
   // ------------------------------------------
   // PENDIENTE
-  // Solo Línea de Trabajo 4
+  // Solo Línea de Trabajo 3 y 4
   // ------------------------------------------
 
   let importePendiente = 0;
 
-  if (ejercicio.linea.idLineaTrabajo === 4) {
+  if (
+    ejercicio.linea.idLineaTrabajo == 3 ||
+    ejercicio.linea.idLineaTrabajo == 4
+  ) {
     importePendiente = subtotal * (pendiente / 100);
   }
 
@@ -240,7 +250,7 @@ function calcularEjercicio(ejercicio: any) {
 
 const granTotal = computed(() => {
   return ejercicios.value.reduce((total, ejercicio) => {
-    return total + calcularTotalEjercicio(ejercicio);
+    return total + calcularTotalEjercicio(ejercicio, 3);
   }, 0);
 });
 
@@ -271,6 +281,23 @@ function eliminarEjercicio(index: number) {
   }
 
   ejercicios.value.splice(index, 1);
+}
+
+const referencia = ref({
+  imagen: "",
+  descripcion1: "",
+  descripcion2: "",
+  descripcion3: "",
+});
+
+function mostrarImagenAumentada(ejercicio) {
+  referencia.value.imagen = ejercicio.material.imagen;
+
+  referencia.value.descripcion1 = ejercicio.material.descripcion1;
+  referencia.value.descripcion2 = ejercicio.material.descripcion2;
+  referencia.value.descripcion3 = ejercicio.material.descripcion3;
+
+  mostrarImagen.value = true;
 }
 
 function cargarValoresIniciales(ejercicio: any) {
@@ -535,6 +562,32 @@ function configurarTodosLosWatchers() {
   });
 }
 
+function onClickDescargar() {
+  var ejers = "";
+
+  ejercicios.value.forEach((ejer) => {
+    ejers +=
+      ejer.precio.idRelacion.toString() +
+      "," +
+      (Number(ejer.pendiente) || 0).toString() +
+      "," +
+      (Number(ejer.metros) || 0).toString() +
+      "|";
+  });
+
+  var title = Titulo.value ?? "Sin título";
+
+  window.open(
+    urlImagenes.value +
+      "/files/DescargarPresupuesto?IDUsuario=" +
+      $q.localStorage.getItem("idusuario") +
+      "&NombreProyecto=" +
+      (title == "" ? "Sin título" : title) +
+      "&Presupuestos=" +
+      ejers
+  );
+}
+
 async function cargarCombosInicio() {
   loading.value = true;
 
@@ -650,17 +703,22 @@ onMounted(async () => {
 
       <q-separator />
 
-      <q-card-section>
-        <div class="row justify-end">
-          <q-btn
-            color="primary"
-            icon="add"
-            label="Nuevo ejercicio"
-            unelevated
-            @click="agregarEjercicio"
-          />
-        </div>
-      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn
+          color="teal-10"
+          icon="download"
+          label="Descargar Ejercicios"
+          unelevated
+          @click="mostrarDescargar = true"
+        />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nuevo ejercicio"
+          unelevated
+          @click="agregarEjercicio"
+        />
+      </q-card-actions>
 
       <q-card-section>
         <q-expansion-item
@@ -683,13 +741,19 @@ onMounted(async () => {
               </q-item-label>
 
               <q-item-label caption>
-                {{ ejercicio.linea.nombre || "Sin línea de trabajo" }}
+                {{
+                  (ejercicio.linea.nombre || "Sin línea de trabajo") +
+                  " " +
+                  (ejercicio.tuberia.tuberia || "") +
+                  " " +
+                  (ejercicio.diametro.diametro || "")
+                }}
               </q-item-label>
             </q-item-section>
 
             <q-item-section side>
               <div class="text-primary text-weight-bold">
-                {{ formatoMXN(calcularTotalEjercicio(ejercicio)) }}
+                {{ formatoMoneda(calcularTotalEjercicio(ejercicio, 3)) }}
               </div>
             </q-item-section>
           </template>
@@ -776,16 +840,27 @@ onMounted(async () => {
             </div>
 
             <div class="row">
-              <div class="q-pa-sm col-12 col-md-6">
+              <div class="q-pa-sm col-12 col-md-6" style="text-align: center">
+                Imagen de Referencia
                 <q-img
                   v-if="ejercicio.material.imagen"
                   :src="urlImagenes + '/imagenes/' + ejercicio.material.imagen"
                   fit="contain"
-                  style="max-height: 300px"
+                  style="max-height: 300px; cursor: zoom-in"
+                  @click="mostrarImagenAumentada(ejercicio)"
                 />
               </div>
 
               <div class="q-pa-sm col-12 col-md-6">
+                <q-input
+                  v-model="ejercicio.precio.descripcion"
+                  outlined
+                  label="Descripción"
+                  type="textarea"
+                  readonly
+                  style="font-size: 12pt"
+                />
+                <br />
                 <q-input
                   v-model="ejercicio.linea.incluye"
                   outlined
@@ -794,63 +869,13 @@ onMounted(async () => {
                   readonly
                   class="q-mb-md"
                 />
-
-                <q-input
-                  v-model="ejercicio.precio.descripcion"
-                  outlined
-                  label="Descripción"
-                  type="textarea"
-                  readonly
-                />
-              </div>
-            </div>
-
-            <div
-              class="row"
-              v-if="ejercicio.material.descripcion1.trim().length > 0"
-            >
-              <div class="q-pa-sm col-12 col-md-12">
-                <q-input
-                  :model-value="ejercicio.material.descripcion1"
-                  outlined
-                  label="Descripción 1"
-                  readonly
-                />
-              </div>
-            </div>
-
-            <div
-              class="row"
-              v-if="ejercicio.material.descripcion2.trim().length > 0"
-            >
-              <div class="q-pa-sm col-12 col-md-12">
-                <q-input
-                  :model-value="ejercicio.material.descripcion2"
-                  outlined
-                  label="Descripción 2"
-                  readonly
-                />
-              </div>
-            </div>
-
-            <div
-              class="row"
-              v-if="ejercicio.material.descripcion3.trim().length > 0"
-            >
-              <div class="q-pa-sm col-12 col-md-12">
-                <q-input
-                  :model-value="ejercicio.material.descripcion3"
-                  outlined
-                  label="Descripción 3"
-                  readonly
-                />
               </div>
             </div>
 
             <div class="row">
               <div class="q-pa-sm col-12 col-md-6">
                 <q-input
-                  :model-value="formatoMXN(ejercicio.precio.precio)"
+                  :model-value="formatoMoneda(ejercicio.precio.precio)"
                   outlined
                   label="Precio por Metro"
                   readonly
@@ -869,7 +894,13 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div v-if="ejercicio.linea.idLineaTrabajo === 4" class="row">
+            <div
+              v-if="
+                ejercicio.linea.idLineaTrabajo == 4 ||
+                ejercicio.linea.idLineaTrabajo == 3
+              "
+              class="row"
+            >
               <div class="q-pa-sm col-12 col-md-6">
                 <q-input
                   v-model.number="ejercicio.pendiente"
@@ -886,7 +917,7 @@ onMounted(async () => {
               <div class="q-pa-sm col-12 col-md-6">
                 <q-input
                   :model-value="
-                    formatoMXN(
+                    formatoMoneda(
                       ejercicio.metros *
                         ejercicio.precio.precio *
                         (ejercicio.pendiente / 100)
@@ -901,13 +932,40 @@ onMounted(async () => {
 
             <q-separator class="q-my-md" />
 
-            <div class="row justify-end">
-              <div class="col-12 col-md-6">
+            <div class="row">
+              <div class="q-pa-sm col-12 col-md-6">
                 <q-input
-                  :model-value="formatoMXN(calcularTotalEjercicio(ejercicio))"
+                  :model-value="
+                    formatoMoneda(calcularTotalEjercicio(ejercicio, 1))
+                  "
                   outlined
                   readonly
                   label="Total sin IVA"
+                  input-class="text-weight-bold text-right"
+                />
+              </div>
+              <div class="q-pa-sm col-12 col-md-6">
+                <q-input
+                  :model-value="
+                    formatoMoneda(calcularTotalEjercicio(ejercicio, 2))
+                  "
+                  outlined
+                  readonly
+                  label="IVA (16%)"
+                  input-class="text-weight-bold text-right"
+                />
+              </div>
+            </div>
+
+            <div class="row justify-end">
+              <div class="q-pa-sm col-12 col-md-6">
+                <q-input
+                  :model-value="
+                    formatoMoneda(calcularTotalEjercicio(ejercicio, 3))
+                  "
+                  outlined
+                  readonly
+                  label="Total"
                   input-class="text-weight-bold text-right"
                 />
               </div>
@@ -930,19 +988,18 @@ onMounted(async () => {
 
       <q-card-section>
         <q-card flat bordered class="bg-primary text-white">
+          <q-separator />
           <q-card-section>
             <div class="row items-center">
               <div class="col">
                 <div class="text-subtitle1 text-weight-medium">GRAN TOTAL</div>
 
-                <div class="text-caption">
-                  Total de todos los ejercicios sin IVA
-                </div>
+                <div class="text-caption">Total de todos los ejercicios</div>
               </div>
 
               <div class="col-auto">
                 <div class="text-h5 text-weight-bold">
-                  {{ formatoMXN(granTotal) }}
+                  {{ formatoMoneda(granTotal) }}
                 </div>
               </div>
             </div>
@@ -951,6 +1008,89 @@ onMounted(async () => {
       </q-card-section>
     </q-card>
   </q-page>
+
+  <q-dialog v-model="mostrarImagen" full-width>
+    <q-card>
+      <q-card-section class="bg-grey-4">
+        <div class="row">
+          <div class="q-pa-sm col-12 col-md-12" style="text-align: center">
+            <span style="font-weight: bold; font-size: 15pt"
+              >Imagen de referencia</span
+            >
+            <q-img
+              :src="urlImagenes + '/imagenes/' + referencia.imagen"
+              style="cursor: zoom-out"
+              @click="mostrarImagen = false"
+            />
+          </div>
+        </div>
+
+        <div class="row" v-if="referencia.descripcion1.trim().length > 0">
+          <div class="q-pa-sm col-12 col-md-12">
+            <q-input
+              :model-value="referencia.descripcion1"
+              outlined
+              label="Descripción 1"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="row" v-if="referencia.descripcion2.trim().length > 0">
+          <div class="q-pa-sm col-12 col-md-12">
+            <q-input
+              :model-value="referencia.descripcion2"
+              outlined
+              label="Descripción 2"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="row" v-if="referencia.descripcion3.trim().length > 0">
+          <div class="q-pa-sm col-12 col-md-12">
+            <q-input
+              :model-value="referencia.descripcion3"
+              outlined
+              label="Descripción 3"
+              readonly
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="mostrarDescargar" persistent>
+    <q-card style="width: 50%">
+      <q-card-section class="bg-grey-4">
+        <div class="text-h6">Descargar ejercicios</div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="q-pa-none">
+        <div class="row">
+          <div class="col-12 col-md-12 q-pa-sm">
+            <q-input
+              outlined
+              label="Titulo"
+              v-model="Titulo"
+              ref="refTitulo"
+              :rules="[(val) => !!val || 'Debe escribir un título']"
+            />
+          </div>
+        </div>
+      </q-card-section>
+      <q-card-actions align="right" class="text-primary">
+        <q-btn label="Cancelar" color="red-10" icon="cancel" v-close-popup />
+        <q-btn
+          label="Aceptar"
+          color="primary"
+          @click="onClickDescargar"
+          icon="check"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <style lang="scss" scoped>

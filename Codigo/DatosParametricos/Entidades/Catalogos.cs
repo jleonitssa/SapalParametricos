@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatosParametricos.Entidades
 {
@@ -59,6 +60,10 @@ namespace DatosParametricos.Entidades
         public string LineaTrabajo { get; set; }
         public Decimal Precio { get; set; }
         public string Descripcion { get; set; }
+        [NotMapped]
+        public Decimal Cantidad { get; set; }
+        [NotMapped]
+        public Decimal Pendiente { get; set; }
     }
     #endregion
 

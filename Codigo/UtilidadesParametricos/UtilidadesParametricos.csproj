@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="PuppeteerSharp" Version="25.1.2" />
+    <PackageReference Include="RestSharp" Version="114.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\DatosParametricos\DatosParametricos.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SeguridadCore">
+      <HintPath>Lib\SeguridadCore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
