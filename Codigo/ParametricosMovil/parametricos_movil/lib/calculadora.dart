@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import 'parametricos_api.dart';
 
 class ConstruccionScreen extends StatefulWidget {
@@ -25,6 +31,7 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
   final List<EjercicioCalculo> listaEjercicios = [
     EjercicioCalculo(
       id: 1,
+       nombre: 'Ejercicio #1',
       isExpanded: true,
     ),
   ];
@@ -56,8 +63,13 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
   // ============================================================
 
   void _agregarNuevoEjercicio() {
+    // Guardamos primero el ID para utilizarlo
+    // tanto en id como en el nombre predeterminado.
+    final int nuevoId = _siguienteIdEjercicio++;
+
     final nuevoEjercicio = EjercicioCalculo(
-      id: _siguienteIdEjercicio++,
+      id: nuevoId,
+      nombre: 'Ejercicio #$nuevoId',
       isExpanded: true,
     );
 
@@ -677,6 +689,835 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
   }
   
   // ============================================================
+  // DESCARGAR PRESUPUESTO HTML
+  // ============================================================
+
+  Future<void> _descargarPresupuesto() async {
+    try {
+      // ========================================================
+      // RECALCULAR TODOS LOS EJERCICIOS
+      // ========================================================
+
+      for (final ejercicio in listaEjercicios) {
+        _calcularEjercicio(ejercicio);
+      }
+
+      // ========================================================
+      // GENERAR HTML
+      // ========================================================
+
+      final String contenidoHtml =
+          _generarHtmlPresupuesto();
+
+      // ========================================================
+      // OBTENER DIRECTORIO TEMPORAL
+      // ========================================================
+
+      final Directory directorio =
+          await getTemporaryDirectory();
+
+      final DateTime ahora = DateTime.now();
+
+      final String fechaArchivo =
+          '${ahora.year}'
+          '${ahora.month.toString().padLeft(2, '0')}'
+          '${ahora.day.toString().padLeft(2, '0')}_'
+          '${ahora.hour.toString().padLeft(2, '0')}'
+          '${ahora.minute.toString().padLeft(2, '0')}';
+
+      final String nombreArchivo =
+          'Presupuesto_$fechaArchivo.html';
+
+      final File archivo = File(
+        '${directorio.path}/$nombreArchivo',
+      );
+
+      // ========================================================
+      // GUARDAR HTML
+      // ========================================================
+
+      await archivo.writeAsString(
+        contenidoHtml,
+        encoding: utf8,
+        flush: true,
+      );
+
+      // ========================================================
+      // COMPARTIR / GUARDAR
+      // ========================================================
+
+      if (!mounted) return;
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile(
+              archivo.path,
+              mimeType: 'text/html',
+            ),
+          ],
+          subject: 'Presupuesto',
+          text: 'Presupuesto generado desde Costos Paramétricos.',
+        ),
+      );
+    } catch (e) {
+      debugPrint(
+        'Error generando presupuesto: $e',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No fue posible generar el presupuesto.\n$e',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+
+  // ============================================================
+  // GENERAR HTML DEL PRESUPUESTO
+  // ============================================================
+
+  String _generarHtmlPresupuesto() {
+    final double subtotal = _obtenerGranTotal();
+    final double iva = subtotal * 0.16;
+    final double total = subtotal + iva;
+
+    final DateTime ahora = DateTime.now();
+
+    final String fecha =
+        '${ahora.day.toString().padLeft(2, '0')}/'
+        '${ahora.month.toString().padLeft(2, '0')}/'
+        '${ahora.year}';
+
+    final String ejerciciosHtml = _generarFilasEjercicios();
+
+    return '''
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 25px;
+        color: #000000;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      .tabla-presupuesto td {
+        padding: 5px 6px;
+      }
+
+      .fila-ejercicio td {
+        border-bottom: 0.5px solid #999999;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <table border="0" style="width: 100%;">
+      <tr>
+
+        <td style="width: 50px;" rowspan="4">
+          <img
+            src="http://187.188.214.154/ParametricosApi/plantillas/favicon.png"
+            style="width:50px"
+          >
+        </td>
+
+        <td style="text-align: center; font-size: 15pt;">
+          Sistema de Agua Potable y Alcantarillado de Le&oacute;n
+          <br />&nbsp;
+        </td>
+
+        <td
+          style="vertical-align: top; text-align: right;"
+          rowspan="4"
+        >
+          $fecha
+        </td>
+
+      </tr>
+
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 11pt;
+            font-weight: bold;
+          "
+        >
+          Costos y Evaluaci&oacute;n
+        </td>
+      </tr>
+
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 11pt;
+            font-weight: bold;
+          "
+        >
+          COSTOS PARAM&Eacute;TRICOS
+          <br />&nbsp;
+        </td>
+      </tr>
+
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 11pt;
+          "
+        >
+          Elabor&oacute;: Usuario
+        </td>
+      </tr>
+
+    </table>
+
+
+    <table
+      style="
+        width: 100%;
+        border-top-width: 0.5px;
+        border-bottom-width: 0.5px;
+        border-top-style: solid;
+        border-bottom-style: solid;
+        margin-top: 10px;
+      "
+    >
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 12pt;
+            font-weight: bold;
+            padding: 5px;
+          "
+        >
+          PRESUPUESTO
+        </td>
+      </tr>
+    </table>
+
+
+    <table
+      border="0"
+      class="tabla-presupuesto"
+      style="width: 100%;"
+    >
+
+      <tr>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Clv. Usuario
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Descripci&oacute;n
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Unidad
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Cantidad
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Precio Unitario
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            border-top: 0.5px solid;
+            border-bottom: 0.5px solid;
+            text-align: center;
+          "
+        >
+          Total
+        </td>
+
+      </tr>
+
+
+      $ejerciciosHtml
+
+
+      <tr>
+
+        <td
+          style="font-size: 9.5pt;"
+          colspan="5"
+        >
+          <b>Subtotal de Presupuesto</b>
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            text-align: right;
+          "
+        >
+          <b>${_formatearMoneda(subtotal)}</b>
+        </td>
+
+      </tr>
+
+
+      <tr>
+        <td
+          style="font-size: 9.5pt;"
+          colspan="6"
+        >
+          <b>
+            ** ${_numeroALetraPlaceholder(subtotal)} **
+          </b>
+        </td>
+      </tr>
+
+
+      <tr>
+        <td
+          style="font-size: 9.5pt;"
+          colspan="6"
+        >
+          &nbsp;
+        </td>
+      </tr>
+
+
+      <tr>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            text-align: right;
+          "
+          colspan="5"
+        >
+          <b>I.V.A. 16%&nbsp;&nbsp;&nbsp;</b>
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            text-align: right;
+          "
+        >
+          <b>${_formatearMoneda(iva)}</b>
+        </td>
+
+      </tr>
+
+
+      <tr>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            text-align: right;
+          "
+          colspan="5"
+        >
+          <b>TOTAL&nbsp;&nbsp;&nbsp;</b>
+        </td>
+
+        <td
+          style="
+            font-size: 9.5pt;
+            text-align: right;
+          "
+        >
+          <b>${_formatearMoneda(total)}</b>
+        </td>
+
+      </tr>
+
+
+      <tr>
+        <td
+          style="font-size: 9.5pt;"
+          colspan="6"
+        >
+          <b>
+            ** ${_numeroALetraPlaceholder(total)} **
+          </b>
+        </td>
+      </tr>
+
+    </table>
+
+  </body>
+  </html>
+  ''';
+  }
+
+
+  // ============================================================
+  // GENERAR FILAS DE EJERCICIOS
+  // ============================================================
+
+  String _generarFilasEjercicios() {
+    final StringBuffer filas = StringBuffer();
+
+    for (int i = 0; i < listaEjercicios.length; i++) {
+      final ejercicio = listaEjercicios[i];
+
+      final double cantidad =
+          _obtenerNumeroController(
+        ejercicio.metrosController,
+      );
+
+      final double precio =
+          _obtenerNumeroController(
+        ejercicio.precioController,
+      );
+
+      final double total =
+          _obtenerNumeroController(
+        ejercicio.totalController,
+      );
+
+      final String descripcion =
+          ejercicio.textoDescripcion ??
+          'Ejercicio ${i + 1}';
+
+      // Por el momento usamos el consecutivo.
+      // Aquí podemos colocar posteriormente la clave real
+      // proveniente de la API.
+      final String clave =
+          (i + 1).toString().padLeft(3, '0');
+
+      filas.write('''
+        <tr class="fila-ejercicio">
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: center;
+            "
+          >
+            ${_escapeHtml(clave)}
+          </td>
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: left;
+            "
+          >
+            ${_escapeHtml(descripcion)}
+          </td>
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: center;
+            "
+          >
+            ML
+          </td>
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: right;
+            "
+          >
+            ${cantidad.toStringAsFixed(2)}
+          </td>
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: right;
+            "
+          >
+            ${_formatearMoneda(precio)}
+          </td>
+
+          <td
+            style="
+              font-size: 9.5pt;
+              text-align: right;
+            "
+          >
+            ${_formatearMoneda(total)}
+          </td>
+
+        </tr>
+      ''');
+    }
+
+    return filas.toString();
+  }
+
+
+  // ============================================================
+  // OBTENER NÚMERO DESDE CONTROLLER
+  // ============================================================
+
+  double _obtenerNumeroController(
+    TextEditingController controller,
+  ) {
+    final String valor = controller.text
+        .replaceAll('\$', '')
+        .replaceAll(',', '')
+        .replaceAll('%', '')
+        .trim();
+
+    return double.tryParse(valor) ?? 0.0;
+  }
+
+
+  // ============================================================
+  // FORMATEAR MONEDA
+  // ============================================================
+
+  String _formatearMoneda(double valor) {
+    final String numero = valor.toStringAsFixed(2);
+
+    final partes = numero.split('.');
+
+    final String entero = partes[0];
+    final String decimal = partes[1];
+
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < entero.length; i++) {
+      final posicionRestante =
+          entero.length - i;
+
+      buffer.write(entero[i]);
+
+      if (posicionRestante > 1 &&
+          posicionRestante % 3 == 1) {
+        buffer.write(',');
+      }
+    }
+
+    return '\$${buffer.toString()}.$decimal';
+  }
+
+
+  // ============================================================
+  // ESCAPAR HTML
+  // ============================================================
+
+  String _escapeHtml(String texto) {
+    return const HtmlEscape().convert(texto);
+  }
+
+
+  // ============================================================
+  // NÚMERO A LETRA
+  // ============================================================
+
+  String _numeroALetraPlaceholder(double valor) {
+    // Posteriormente podemos reemplazar esta función
+    // por la conversión completa de cantidad a letras.
+
+    return '${_formatearMoneda(valor)} M.N.';
+  }
+
+  // ============================================================
+  // DESCRIPCIÓN EJERCICIO
+  // ============================================================
+
+  String _obtenerDescripcionEjercicio(
+    EjercicioCalculo ejercicio,
+  ) {
+    final List<String> partes = [];
+
+    // Línea de Trabajo
+    final String? lineaTrabajo =
+        ejercicio.objetoCompletoLineaTrabajo?['nombre']
+            ?.toString()
+            .trim();
+
+    // Tipo de Tubería
+    final String? tipoTuberia =
+        ejercicio.objetoCompletoTipoTuberia?['tuberia']
+            ?.toString()
+            .trim();
+
+    // Diámetro de Tubería
+    final String? diametro =
+        ejercicio.objetoCompletoDiametroTuberia?['diametro']
+            ?.toString()
+            .trim();
+
+    if (lineaTrabajo != null && lineaTrabajo.isNotEmpty) {
+      partes.add(lineaTrabajo);
+    }
+
+    if (tipoTuberia != null && tipoTuberia.isNotEmpty) {
+      partes.add(tipoTuberia);
+    }
+
+    if (diametro != null && diametro.isNotEmpty) {
+      partes.add(diametro);
+    }
+
+    if (partes.isEmpty) {
+      return 'Configure los parámetros del ejercicio';
+    }
+
+    return partes.join('  •  ');
+  }
+
+  // ============================================================
+  // CAMBIAR NOMBRE EJERCICIO
+  // ============================================================
+
+  Future<void> _editarNombreEjercicio(
+    EjercicioCalculo ejercicio,
+  ) async {
+    String nombreTemporal = ejercicio.nombre;
+
+    final String? nuevoNombre = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+
+          title: Text(
+            'Cambiar nombre',
+            style: baseTextStyle.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: primaryBlue,
+            ),
+          ),
+
+          content: TextFormField(
+            initialValue: ejercicio.nombre,
+            autofocus: true,
+            textCapitalization: TextCapitalization.sentences,
+            maxLength: 60,
+
+            decoration: InputDecoration(
+              labelText: 'Nombre del ejercicio',
+              hintText: 'Ej. Línea principal',
+              prefixIcon: const Icon(
+                Icons.edit_outlined,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+
+            onChanged: (value) {
+              nombreTemporal = value;
+            },
+
+            onFieldSubmitted: (value) {
+              final String nombre = value.trim();
+
+              if (nombre.isNotEmpty) {
+                Navigator.of(dialogContext).pop(nombre);
+              }
+            },
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text(
+                'Cancelar',
+              ),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryBlue,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                final String nombre =
+                    nombreTemporal.trim();
+
+                if (nombre.isEmpty) {
+                  return;
+                }
+
+                Navigator.of(dialogContext).pop(
+                  nombre,
+                );
+              },
+              child: const Text(
+                'Guardar',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (nuevoNombre == null ||
+        nuevoNombre.trim().isEmpty) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      ejercicio.nombre =
+          nuevoNombre.trim();
+    });
+  }
+
+  // ============================================================
+  // CONFIRMAR ELIMINAR EJERCICIO
+  // ============================================================
+
+  Future<void> _confirmarEliminarEjercicio(
+    int index,
+    EjercicioCalculo ejercicio,
+  ) async {
+    final bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.redAccent,
+                  size: 22,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Text(
+                  'Eliminar ejercicio',
+                  style: baseTextStyle.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: primaryBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          content: Text(
+            '¿Estás seguro de que deseas eliminar '
+            '"${ejercicio.nombre}"?\n\n'
+            'Esta acción no se puede deshacer.',
+            style: baseTextStyle.copyWith(
+              fontSize: 14,
+              color: const Color(0xFF667085),
+              height: 1.4,
+            ),
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text(
+                'Cancelar',
+              ),
+            ),
+
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              icon: const Icon(
+                Icons.delete_outline,
+                size: 18,
+              ),
+              label: const Text(
+                'Eliminar',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmar != true) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    _eliminarEjercicio(index);
+  }
+
+  // ============================================================
   // BUILD
   // ============================================================
 
@@ -790,31 +1631,78 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                   // ==================================================
 
                   Center(
-                    child: ElevatedButton.icon(
-                      onPressed: _agregarNuevoEjercicio,
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: [
 
-                      icon: const Icon(
-                        Icons.add,
-                        size: 18,
-                      ),
+                        // ======================================================
+                        // AGREGAR EJERCICIO
+                        // ======================================================
 
-                      label: const Text(
-                        'Agregar Ejercicio',
-                      ),
+                        ElevatedButton.icon(
+                          onPressed: _agregarNuevoEjercicio,
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryBlue,
-                        foregroundColor: Colors.white,
+                          icon: const Icon(
+                            Icons.add,
+                            size: 18,
+                          ),
 
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
+                          label: const Text(
+                            'Agregar Ejercicio',
+                          ),
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryBlue,
+                            foregroundColor: Colors.white,
+
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+
+                        // ======================================================
+                        // DESCARGAR PRESUPUESTO
+                        // ======================================================
+
+                        OutlinedButton.icon(
+                          onPressed: _descargarPresupuesto,
+
+                          icon: const Icon(
+                            Icons.download_outlined,
+                            size: 18,
+                          ),
+
+                          label: const Text(
+                            'Descargar Presupuesto',
+                          ),
+
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: primaryBlue,
+
+                            side: BorderSide(
+                              color: primaryBlue,
+                            ),
+
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
@@ -922,39 +1810,65 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
             Colors.grey[50],
 
         title: Text(
-          'Ejercicio #${index + 1}',
-          style:
-              baseTextStyle.copyWith(
-            fontWeight:
-                FontWeight.bold,
+          ejercicio.nombre,
+          style: baseTextStyle.copyWith(
+            fontWeight: FontWeight.bold,
             fontSize: 16,
             color: primaryBlue,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: Text(
+            _obtenerDescripcionEjercicio(ejercicio),
+            style: baseTextStyle.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey.shade500,
+              height: 1.25,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
 
         trailing: Row(
-          mainAxisSize:
-              MainAxisSize.min,
-
+          mainAxisSize: MainAxisSize.min,
           children: [
 
+            // EDITAR NOMBRE
+            IconButton(
+              icon: Icon(
+                Icons.edit_outlined,
+                size: 20,
+                color: primaryBlue.withOpacity(0.75),
+              ),
+              tooltip: 'Editar nombre',
+              onPressed: () {
+                _editarNombreEjercicio(ejercicio);
+              },
+            ),
+
+            // ELIMINAR EJERCICIO
             if (listaEjercicios.length > 1)
               IconButton(
                 icon: const Icon(
                   Icons.delete_outline,
-                  color:
-                      Colors.redAccent,
+                  color: Colors.redAccent,
                 ),
-
-                tooltip:
-                    'Eliminar ejercicio',
-
-                onPressed:
-                    () => _eliminarEjercicio(
-                  index,
-                ),
+                tooltip: 'Eliminar ejercicio',
+                onPressed: () {
+                  _confirmarEliminarEjercicio(
+                    index,
+                    ejercicio,
+                  );
+                },
               ),
 
+            // EXPANDIR / CONTRAER
             const Icon(
               Icons.expand_more,
             ),
@@ -1481,9 +2395,9 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                       ejercicio
                           .totalController,
 
-                  mostrarPendiente: 
-                      ejercicio
-                        .lineaTrabajoSeleccionada == 4,
+                  mostrarPendiente:
+                      ejercicio.lineaTrabajoSeleccionada == 3 ||
+                      ejercicio.lineaTrabajoSeleccionada == 4,
                 ),
 
                 const SizedBox(
@@ -1858,8 +2772,15 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                           ),
 
                           onPressed: () {
-                            _mostrarImagen(
-                              urlImagen,
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => VisorImagenScreen(
+                                  imageUrl: urlImagen,
+                                  descripcion1: descripcion1,
+                                  descripcion2: descripcion2,
+                                  descripcion3: descripcion3,
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -1968,165 +2889,6 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
                     ),
                   ],
                 ),
-
-                // ==========================================
-                // DESCRIPCIÓN 1
-                // ==========================================
-
-                if (descripcion1 != null &&
-                    descripcion1.trim().isNotEmpty) ...[
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-
-                    children: [
-
-                      Expanded(
-                        child:
-                            RichText(
-                          text:
-                              TextSpan(
-                            style:
-                                baseStyle.copyWith(
-                              color:
-                                  Colors.black87,
-                              fontSize:
-                                  13,
-                            ),
-
-                            children: [
-
-                              const TextSpan(
-                                text:
-                                    'Descripción 1: ',
-                                style:
-                                    TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-
-                              TextSpan(
-                                text:
-                                    descripcion1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-
-                // ==========================================
-                // DESCRIPCIÓN 2
-                // ==========================================
-
-                if (descripcion2 != null &&
-                    descripcion2.trim().isNotEmpty) ...[
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-
-                    children: [
-
-                      Expanded(
-                        child:
-                            RichText(
-                          text:
-                              TextSpan(
-                            style:
-                                baseStyle.copyWith(
-                              color:
-                                  Colors.black87,
-                              fontSize:
-                                  13,
-                            ),
-
-                            children: [
-
-                              const TextSpan(
-                                text:
-                                    'Descripción 2: ',
-                                style:
-                                    TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-
-                              TextSpan(
-                                text:
-                                    descripcion2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-
-                // ==========================================
-                // DESCRIPCIÓN 3
-                // ==========================================
-
-                if (descripcion3 != null &&
-                    descripcion3.trim().isNotEmpty) ...[
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-
-                    children: [
-
-                      Expanded(
-                        child:
-                            RichText(
-                          text:
-                              TextSpan(
-                            style:
-                                baseStyle.copyWith(
-                              color:
-                                  Colors.black87,
-                              fontSize:
-                                  13,
-                            ),
-
-                            children: [
-
-                              const TextSpan(
-                                text:
-                                    'Descripción 3: ',
-                                style:
-                                    TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-
-                              TextSpan(
-                                text:
-                                    descripcion3,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),
@@ -2151,127 +2913,6 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
         color: Colors.grey,
         size: 40,
       ),
-    );
-  }
-
-  // ============================================================
-  // MOSTRAR IMAGEN EN MODAL
-  // ============================================================
-
-  void _mostrarImagen(
-    String urlImagen,
-  ) {
-    showDialog(
-      context: context,
-
-      builder: (context) {
-        return Dialog(
-          backgroundColor:
-              Colors.transparent,
-
-          insetPadding:
-              const EdgeInsets.all(
-            10,
-          ),
-
-          child:
-              Stack(
-            alignment:
-                Alignment.topRight,
-
-            children: [
-
-              Container(
-                width:
-                    double.infinity,
-
-                height:
-                    MediaQuery.of(
-                  context,
-                ).size.height *
-                    0.7,
-
-                decoration:
-                    BoxDecoration(
-                  color:
-                      Colors.white,
-
-                  borderRadius:
-                      BorderRadius.circular(
-                    12,
-                  ),
-                ),
-
-                child:
-                    ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(
-                    12,
-                  ),
-
-                  child:
-                      InteractiveViewer(
-                    panEnabled:
-                        true,
-
-                    minScale:
-                        0.5,
-
-                    maxScale:
-                        4.0,
-
-                    child:
-                        Image.network(
-                      urlImagen,
-
-                      fit:
-                          BoxFit.contain,
-
-                      errorBuilder:
-                          (
-                        context,
-                        error,
-                        stackTrace,
-                      ) {
-                        return _buildImageError();
-                      },
-                    ),
-                  ),
-                ),
-              ),
-
-              Padding(
-                padding:
-                    const EdgeInsets.all(
-                  12.0,
-                ),
-
-                child:
-                    CircleAvatar(
-                  backgroundColor:
-                      Colors.black54,
-
-                  child:
-                      IconButton(
-                    icon:
-                        const Icon(
-                      Icons.close,
-                      color:
-                          Colors.white,
-                    ),
-
-                    onPressed:
-                        () =>
-                            Navigator.of(
-                          context,
-                        ).pop(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -2443,74 +3084,27 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
           // ==================================================
 
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
-
             children: [
-
               Text(
                 'PRECIO POR METRO',
-
-                style:
-                    baseStyle.copyWith(
+                style: baseStyle.copyWith(
                   fontSize: 12,
-                  fontWeight:
-                      FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
+              const SizedBox(width: 12),
+
               Expanded(
-                child:
-                    Container(
-                  height: 40,
-
-                  alignment:
-                      Alignment.centerRight,
-
-                  child:
-                      TextField(
-                    controller:
-                        precioController,
-
-                    keyboardType:
-                        const TextInputType.numberWithOptions(
-                      decimal:
-                          true,
-                    ),
-
-                    textAlign:
-                        TextAlign.end,
-
-                    style:
-                        baseStyle.copyWith(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    precioController.text,
+                    textAlign: TextAlign.end,
+                    style: baseStyle.copyWith(
                       fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          primaryBlue,
-                    ),
-
-                    decoration:
-                        const InputDecoration(
-                      fillColor:
-                          Colors.transparent,
-
-                      filled:
-                          true,
-
-                      isCollapsed:
-                          true,
-
-                      contentPadding:
-                          EdgeInsets.symmetric(
-                        horizontal:
-                            10,
-                        vertical:
-                            10,
-                      ),
-
-                      border:
-                          InputBorder.none,
+                      fontWeight: FontWeight.bold,
+                      color: primaryBlue,
                     ),
                   ),
                 ),
@@ -2624,74 +3218,27 @@ class _ConstruccionScreenState extends State<ConstruccionScreen> {
           // ==================================================
 
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
-
             children: [
-
               Text(
                 'TOTAL SIN IVA',
-
-                style:
-                    baseStyle.copyWith(
+                style: baseStyle.copyWith(
                   fontSize: 12,
-                  fontWeight:
-                      FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
+              const SizedBox(width: 12),
+
               Expanded(
-                child:
-                    Container(
-                  height: 40,
-
-                  alignment:
-                      Alignment.centerRight,
-
-                  child:
-                      TextField(
-                    controller:
-                        totalController,
-
-                    readOnly:
-                        true,
-
-                    keyboardType:
-                        TextInputType.text,
-
-                    textAlign:
-                        TextAlign.end,
-
-                    style:
-                        baseStyle.copyWith(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    totalController.text,
+                    textAlign: TextAlign.end,
+                    style: baseStyle.copyWith(
                       fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color:
-                          Colors.black,
-                    ),
-
-                    decoration:
-                        const InputDecoration(
-                      fillColor:
-                          Colors.transparent,
-
-                      filled:
-                          true,
-
-                      isCollapsed:
-                          true,
-
-                      contentPadding:
-                          EdgeInsets.symmetric(
-                        horizontal:
-                            10,
-                        vertical:
-                            10,
-                      ),
-
-                      border:
-                          InputBorder.none,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -2822,6 +3369,8 @@ class EjercicioCalculo {
 
   bool isExpanded;
 
+  String nombre;
+
   // ========================================================================
   // ESPECIFICACIÓN
   // ========================================================================
@@ -2951,6 +3500,7 @@ class EjercicioCalculo {
 
   EjercicioCalculo({
     required this.id,
+    required this.nombre,
     this.isExpanded = true,
   });
 
@@ -2963,5 +3513,312 @@ class EjercicioCalculo {
     precioController.dispose();
     pendienteController.dispose();
     totalController.dispose();
+  }
+}
+
+
+// ============================================================================
+// MODELO DE EJERCICIO
+// ============================================================================
+
+class VisorImagenScreen extends StatefulWidget {
+  final String imageUrl;
+  final String? descripcion1;
+  final String? descripcion2;
+  final String? descripcion3;
+
+  const VisorImagenScreen({
+    super.key,
+    required this.imageUrl,
+    this.descripcion1,
+    this.descripcion2,
+    this.descripcion3,
+  });
+
+  @override
+  State<VisorImagenScreen> createState() =>
+      _VisorImagenScreenState();
+}
+
+class _VisorImagenScreenState extends State<VisorImagenScreen> {
+  final TransformationController _transformationController =
+      TransformationController();
+
+  TapDownDetails? _doubleTapDetails;
+
+  // ============================================================================
+  // OBTENER DESCRIPCIONES
+  // ============================================================================
+
+  List<Map<String, String>> _obtenerDescripciones() {
+    final List<Map<String, String>> descripciones = [];
+
+    void agregarDescripcion(
+      int numero,
+      String? descripcion,
+    ) {
+      if (descripcion == null) return;
+
+      final texto = descripcion.trim();
+
+      if (texto.isEmpty ||
+          texto.toLowerCase() == 'null') {
+        return;
+      }
+
+      descripciones.add({
+        'titulo': 'Descripción $numero',
+        'texto': texto,
+      });
+    }
+
+    agregarDescripcion(
+      1,
+      widget.descripcion1,
+    );
+
+    agregarDescripcion(
+      2,
+      widget.descripcion2,
+    );
+
+    agregarDescripcion(
+      3,
+      widget.descripcion3,
+    );
+
+    return descripciones;
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    _doubleTapDetails = details;
+  }
+
+  void _handleDoubleTap() {
+    final Matrix4 currentMatrix =
+        _transformationController.value;
+
+    // Si ya existe zoom, regresar al tamaño original
+    if (currentMatrix != Matrix4.identity()) {
+      _transformationController.value =
+          Matrix4.identity();
+      return;
+    }
+
+    final Offset position =
+        _doubleTapDetails?.localPosition ??
+        Offset.zero;
+
+    const double zoom = 2.5;
+
+    _transformationController.value =
+        Matrix4.identity()
+          ..translate(
+            -position.dx * (zoom - 1),
+            -position.dy * (zoom - 1),
+          )
+          ..scale(zoom);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final descripciones = _obtenerDescripciones();
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+
+      body: Stack(
+        children: [
+
+          // ====================================================
+          // IMAGEN
+          // ====================================================
+          Positioned.fill(
+            child: GestureDetector(
+              onDoubleTapDown: _handleDoubleTapDown,
+              onDoubleTap: _handleDoubleTap,
+
+              child: InteractiveViewer(
+                transformationController:
+                    _transformationController,
+
+                minScale: 1.0,
+                maxScale: 5.0,
+
+                panEnabled: true,
+                scaleEnabled: true,
+
+                boundaryMargin:
+                    const EdgeInsets.all(80),
+
+                child: Center(
+                  child: Image.network(
+                    widget.imageUrl,
+
+                    fit: BoxFit.contain,
+
+                    loadingBuilder: (
+                      context,
+                      child,
+                      loadingProgress,
+                    ) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      );
+                    },
+
+                    errorBuilder: (
+                      context,
+                      error,
+                      stackTrace,
+                    ) {
+                      return const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.white70,
+                              size: 48,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              'No fue posible cargar la imagen',
+                              style: TextStyle(
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ====================================================
+          // BOTÓN CERRAR
+          // ====================================================
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                        Colors.black.withOpacity(0.45),
+                    foregroundColor: Colors.white,
+                  ),
+
+                  icon: const Icon(
+                    Icons.close,
+                    size: 26,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ====================================================
+          // PIE DE FOTO
+          // ====================================================
+          if (descripciones.isNotEmpty)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+
+            child: SafeArea(
+              top: false,
+
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  30,
+                  20,
+                  18,
+                ),
+
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.0),
+                      Colors.black.withOpacity(0.85),
+                    ],
+                  ),
+                ),
+
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
+                  children: [
+                    for (
+                      int i = 0;
+                      i < descripciones.length;
+                      i++
+                    ) ...[
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                          children: [
+                            TextSpan(
+                              text:
+                                  '${descripciones[i]['titulo']}: ',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+
+                            TextSpan(
+                              text:
+                                  descripciones[i]['texto'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      if (i < descripciones.length - 1)
+                        const SizedBox(height: 8),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

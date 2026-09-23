@@ -23,23 +23,171 @@ class ParametricosApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Parametricos App',
-/*       theme: ThemeData(
+      theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: Color(0xFF0A1931),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0A1931),
-          brightness:
-              Brightness.dark,
+
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF003D71),
+          onPrimary: Colors.white,
+
+          primaryContainer: Color(0xFFDCEAF5),
+          onPrimaryContainer: Color(0xFF002A4E),
+
+          secondary: Color(0xFF1769AA),
+          onSecondary: Colors.white,
+
+          surface: Color(0xFFF7F9FC),
+          onSurface: Color(0xFF172033),
+
+          error: Color(0xFFB3261E),
+          onError: Colors.white,
+
+          outline: Color(0xFFD4DAE3),
+          outlineVariant: Color(0xFFE4E8EE),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(
-            0xFFF1F4F8,
+
+        scaffoldBackgroundColor: const Color(0xFFF1F4F8),
+
+        // =========================================================
+        // CURSOR Y SELECCIÓN DE TEXTO
+        // =========================================================
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFF003D71),
+          selectionColor: Color(0x403D71FF),
+          selectionHandleColor: Color(0xFF003D71),
+        ),
+
+        // =========================================================
+        // INPUTS
+        // =========================================================
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+
+          labelStyle: const TextStyle(
+            color: Color(0xFF667085),
           ),
-          elevation: 0,
+
+          floatingLabelStyle: const TextStyle(
+            color: Color(0xFF003D71),
+            fontWeight: FontWeight.w600,
+          ),
+
+          hintStyle: const TextStyle(
+            color: Color(0xFF98A2B3),
+          ),
+
+          prefixIconColor: const Color(0xFF667085),
+          suffixIconColor: const Color(0xFF667085),
+
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 15,
+          ),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFFD4DAE3),
+            ),
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFFD4DAE3),
+              width: 1,
+            ),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFF003D71),
+              width: 2,
+            ),
+          ),
+
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFFB3261E),
+            ),
+          ),
+
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFFB3261E),
+              width: 2,
+            ),
+          ),
+        ),
+
+        // =========================================================
+        // DIALOG
+        // =========================================================
+        dialogTheme: DialogThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 8,
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+
+          titleTextStyle: const TextStyle(
+            color: Color(0xFF003D71),
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+          ),
+
+          contentTextStyle: const TextStyle(
+            color: Color(0xFF4F5B6B),
+            fontSize: 14,
+          ),
+        ),
+
+        // =========================================================
+        // TEXT BUTTON
+        // "CANCELAR"
+        // =========================================================
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF003D71),
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+
+        // =========================================================
+        // ELEVATED BUTTON
+        // "GUARDAR"
+        // =========================================================
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF003D71),
+            foregroundColor: Colors.white,
+            elevation: 0,
+
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 14,
+            ),
+
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
       darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: ThemeMode.system, */
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       routerConfig: _router, 
     );
